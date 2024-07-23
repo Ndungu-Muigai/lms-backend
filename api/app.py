@@ -44,7 +44,7 @@ api=Api(app)
 
 #Index resource
 class Index(Resource):
-    def get():
+    def get(self):
         return make_response(jsonify({"message": "Welcome to the Mobikey LMS backend"}),200)
 
 api.add_resource(Index, "/")
