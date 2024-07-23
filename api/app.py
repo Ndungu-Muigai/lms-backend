@@ -271,7 +271,7 @@ class Dashboard(Resource):
             }
         ))
 
-api.add_resource(Dashboard, "/home")
+api.add_resource(Dashboard, "/dashboard")
 
 #Leave applications resource
 class LeaveApplications(Resource):
@@ -431,26 +431,26 @@ api.add_resource(LeaveApplicationByID, "/leave-applications/<int:id>")
 class AllRequests(Resource):
     def get(self):
         #Getting all the requests
-        leave_requests=LeaveApplication.query.all()
+        leave_requests=LeaveApplication.query.filter_by(status="Approved").all()
 
         #Looping over all the requests and updating the status variable
-        request_list=[]
-        for request in leave_requests:
+        # request_list=[]
+        # for request in leave_requests:
 
-            if request.hod_status == "Approved" and request.hr_status == "Approved" and request.gm_status=="Approved":
-                request.status="Approved"
-                request_list.append(request)
+        #     if request.hod_status == "Approved" and request.hr_status == "Approved" and request.gm_status=="Approved":
+        #         request.status="Approved"
+        #         request_list.append(request)
 
-            elif request.hod_status == "Pending" or request.hr_status == "Pending" or request.gm_status=="Pending":
-                request.status="Pending"
-                request_list.append(request)
+        #     elif request.hod_status == "Pending" or request.hr_status == "Pending" or request.gm_status=="Pending":
+        #         request.status="Pending"
+        #         request_list.append(request)
 
-            else:
-                request.status="Rejected"
-                request_list.append(request)
+        #     else:
+        #         request.status="Rejected"
+        #         request_list.append(request)
 
         #Creating a dict of the requests
-        leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(request_list, many=True)
+        leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(leave_requests, many=True)
 
         return make_response(leave_requests_dict, 200)
 
