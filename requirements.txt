@@ -1,0 +1,8 @@
+flask
+flask-sqlalchemy
+flask-migrate
+flask-restful
+python-dotenv
+marshmallow
+redis
+sib_api_v3_sdk
