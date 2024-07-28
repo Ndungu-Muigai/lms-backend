@@ -20,7 +20,11 @@ app.config["SECRET_KEY"]=os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"]="redis"
 app.config["SESSION_PERMANENT"]=True
 app.config["SESSION_USER_SIGNER"]=False
-app.config["SESSION_REDIS"]=redis.from_url("redis://127.0.0.1:6379")
+r = redis.Redis(
+  host='redis-15712.c44.us-east-1-2.ec2.cloud.redislabs.com',
+  port=15712,
+  password='vGJSqjRJLkhDOLwDbq6HOJexk9UoidQb')
+app.config["SESSION_REDIS"]=r
 app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(minutes=30)
 
 #Configuring the database
