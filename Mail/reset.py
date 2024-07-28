@@ -11,7 +11,7 @@ api_instance=sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(conf
 
 def send_otp(email, otp, first_name, last_name):
     subject="One Time Password"
-    sender={"name": app.app.config.SENDER_NAME, "email": app.app.config.SENDER_EMAIL}
+    sender={"name": app.app.config["SENDER_NAME"], "email": app.app.config["SENDER_EMAIL"]}
 
     content=f"""
     <p style="color: black;">Greetings {first_name} {last_name},</p>
