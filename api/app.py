@@ -80,6 +80,8 @@ class Login(Resource):
         session["employee_department"]=employee.department
         session["employee_section"]=employee.section
 
+        print(session["employee_id"])
+
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
             {
@@ -222,6 +224,7 @@ class Dashboard(Resource):
         #Getting the ID of the current logged in user
         employee_id=session.get("employee_id")
 
+        print(employee_id)
         #If a user is not logged in, return an error
         if not employee_id:
             return make_response(jsonify({"error": "Kindly login to continue"}))
