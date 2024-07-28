@@ -1,8 +1,8 @@
-"""Creating a new database
+"""Added a name attribute to the Enums
 
-Revision ID: 5852ded80174
+Revision ID: 65d7085094c8
 Revises: 
-Create Date: 2024-05-24 16:40:25.479678
+Create Date: 2024-07-28 10:20:50.150508
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5852ded80174'
+revision = '65d7085094c8'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,7 +31,7 @@ def upgrade():
     sa.Column('role', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
     sa.Column('first_login', sa.Boolean(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -46,16 +46,16 @@ def upgrade():
     op.create_table('leave_applications',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('employee_id', sa.Integer(), nullable=True),
-    sa.Column('leave_type', sa.Enum('Sick', 'Maternity', 'Paternity', 'Normal'), nullable=False),
+    sa.Column('leave_type', sa.Enum('Sick', 'Maternity', 'Paternity', 'Normal', name='leave_type'), nullable=False),
     sa.Column('leave_duration', sa.String(), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
     sa.Column('end_date', sa.Date(), nullable=False),
     sa.Column('total_days', sa.Float(), nullable=False),
     sa.Column('file_attachment', sa.String(), nullable=True),
     sa.Column('reason', sa.String(), nullable=True),
-    sa.Column('hod_status', sa.Enum('Pending', 'Approved', 'Rejected'), nullable=False),
-    sa.Column('hr_status', sa.Enum('Pending', 'Approved', 'Rejected'), nullable=False),
-    sa.Column('gm_status', sa.Enum('Pending', 'Approved', 'Rejected'), nullable=False),
+    sa.Column('hod_status', sa.Enum('Pending', 'Approved', 'Rejected', name='hod_status'), nullable=False),
+    sa.Column('hr_status', sa.Enum('Pending', 'Approved', 'Rejected', name='hr_status'), nullable=False),
+    sa.Column('gm_status', sa.Enum('Pending', 'Approved', 'Rejected', name='gm_status'), nullable=False),
     sa.ForeignKeyConstraint(['employee_id'], ['employees.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
