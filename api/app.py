@@ -25,7 +25,7 @@ app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(minutes=30)
 #Configuring the database
 app.config["SQLALCHEMY_TRACK_MODIFICATION"]=False
 app.config["SQLALCHEMY_ECHO"]=False
-app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///lms.db"
+app.config["SQLALCHEMY_DATABASE_URI"]=os.getenv("SQLALCHEMY_DATABASE_URI")
 
 #Configuring the file uploads
 app.config["UPLOAD_FOLDER"]='./static/Uploads'
