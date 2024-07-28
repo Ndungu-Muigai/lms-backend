@@ -23,7 +23,7 @@ app.config["SESSION_REDIS"]=redis.from_url("redis://127.0.0.1:6379")
 app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(minutes=30)
 
 #Configuring the database
-app.config["SQLALCHEMY_TRACK_MODIFICATION"]=False
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 app.config["SQLALCHEMY_ECHO"]=False
 app.config["SQLALCHEMY_DATABASE_URI"]=os.getenv("SQLALCHEMY_DATABASE_URI")
 
