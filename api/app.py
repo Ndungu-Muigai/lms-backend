@@ -1,5 +1,6 @@
 from flask import Flask, make_response, request, jsonify, session, send_from_directory
 from flask_migrate import Migrate
+from flask_cors import CORS
 from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword   
 from flask_restful import Api, Resource
 from schema import EmployeeSchema, LeaveDaysSchema, LeaveApplicationsSchema
@@ -38,6 +39,8 @@ app.static_folder = 'static'
 #Initializing the migration
 migrate=Migrate(app, db)
 db.init_app(app)
+
+CORS(app)
 
 #Wrapping the app as an API instance
 api=Api(app)
