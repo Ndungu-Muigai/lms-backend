@@ -11,7 +11,7 @@ api_instance=sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(conf
 
 def send_login_credentials(first_name, last_name, email, username, password):
     subject="Login credentials"
-    sender={"name": app.app.config.SENDER_NAME, "email": app.app.config.SENDER_EMAIL}
+    sender={"name": app.app.config["SENDER_NAME"], "email": app.app.config["SENDER_EMAIL"]}
     email_content=f"""
     <p>Dear {first_name} {last_name},</p>
     <p>Your Leave Management System account has been created successfully.</p>
