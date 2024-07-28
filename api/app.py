@@ -20,7 +20,7 @@ app.config["SECRET_KEY"]=os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"]="redis"
 app.config["SESSION_PERMANENT"]=True
 app.config["SESSION_USER_SIGNER"]=False
-app.config["SESSION_REDIS"]=redis.from_url("redis://mobikey-lms-rvdpsl.serverless.use1.cache.amazonaws.com:6379")
+app.config["SESSION_REDIS"]=redis.from_url("redis://subtle-wasp-31289.upstash.io")
 app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(minutes=30)
 
 #Configuring the database
