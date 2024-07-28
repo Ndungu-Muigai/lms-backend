@@ -57,9 +57,9 @@ class LeaveApplication(db.Model):
     total_days=db.Column(db.Float, nullable=False)
     file_attachment=db.Column(db.String, nullable=True)
     reason=db.Column(db.String, nullable=True)
-    hod_status=db.Column(db.Enum("Pending", "Approved", "Rejected"), nullable=False, default="Pending")
-    hr_status=db.Column(db.Enum("Pending", "Approved", "Rejected"), nullable=False, default="Pending")
-    gm_status=db.Column(db.Enum("Pending", "Approved", "Rejected"), nullable=False, default="Pending")
+    hod_status = db.Column(db.Enum("Pending", "Approved", "Rejected", name="hod_status"), nullable=False, default="Pending")
+    hr_status = db.Column(db.Enum("Pending", "Approved", "Rejected", name="hr_status"), nullable=False, default="Pending")
+    gm_status = db.Column(db.Enum("Pending", "Approved", "Rejected", name="gm_status"), nullable=False, default="Pending")
 
 class OneTimePassword(db.Model):
 
