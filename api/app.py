@@ -21,9 +21,7 @@ app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_USER_SIGNER"] = False
 
-# Use environment variable for Redis URL
-redis_url = os.getenv('KV_URL', 'redis://localhost:6379/0')
-app.config['SESSION_REDIS'] = redis.from_url(redis_url)
+app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_URL"))
 
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
