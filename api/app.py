@@ -64,11 +64,11 @@ class Login(Resource):
 
         #If the username doesn't exists, return an error
         if not employee:
-            return make_response(jsonify({"error": "Incorrect username!"}), 409)
+            return make_response(jsonify({"error": "Incorrect username!"}), 400)
         
         #If the password is incorrect, return an error
         elif employee.password!= hashlib.md5(password.encode("utf-8")).hexdigest():
-            return make_response(jsonify({"error": "Incorrect password!"}), 409)
+            return make_response(jsonify({"error": "Incorrect password!"}), 400)
         
         #Creating sessions that will be used later on in the program 
         session["employee_id"]=employee.id
