@@ -1,4 +1,5 @@
 from flask import Flask, make_response, request, jsonify, session
+from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
 from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword   
@@ -13,16 +14,15 @@ from Mail.credentials import send_login_credentials
 from Mail.reset import send_otp
 from Generations.password import random_password
 from Generations.otp import get_otp
-import redis
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
-app.config["SESSION_TYPE"] = "redis"
+
+# Session configuration for filesystem
+app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_USER_SIGNER"] = False
-
-app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_URL"))
-
+app.config["SESSION_FILE_DIR"] = "./flask_session"  # Directory to store session files
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
 # Configuring the database
@@ -42,11 +42,13 @@ app.static_folder = 'static'
 migrate = Migrate(app, db)
 db.init_app(app)
 
+# Initialize the session extension
+Session(app)
+
 CORS(app)
 
 # Wrapping the app as an API instance
 api = Api(app)
-
 
 #Index resource
 class Index(Resource):
