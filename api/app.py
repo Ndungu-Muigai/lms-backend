@@ -627,7 +627,7 @@ class Employees(Resource):
         
         #Checking if the username exists in the database. If it does, return an error
         elif Employee.query.filter_by(username=username).first():
-            return make_response(jsonify({"error" : "Username already exists"}),409)
+            return make_response(jsonify({"error" : "An account with the given names already exists"}),409)
         
         #Creating the account details
         hashed_password=hashlib.md5(password.encode("utf-8")).hexdigest()
