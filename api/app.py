@@ -94,6 +94,7 @@ class UpdatePassword(Resource):
         #Getting the ID of the employee
         employee_id=session.get("employee_id")
 
+        print(employee_id)
         #Getting the form data
         password=request.json["new_password"]
         confirm_password=request.json["confirm_password"]
