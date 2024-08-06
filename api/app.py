@@ -15,35 +15,39 @@ from Generations.password import random_password
 from Generations.otp import get_otp
 import redis
 
-app=Flask(__name__)
-app.config["SECRET_KEY"]=os.environ["SECRET_KEY"]
-app.config["SESSION_TYPE"]="redis"
-app.config["SESSION_PERMANENT"]=True
-app.config["SESSION_USER_SIGNER"]=False
-app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379)
-app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(minutes=30)
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = True
+app.config["SESSION_USER_SIGNER"] = False
 
-#Configuring the database
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
-app.config["SQLALCHEMY_ECHO"]=False
-app.config["SQLALCHEMY_DATABASE_URI"]=os.getenv("SQLALCHEMY_DATABASE_URI")
+# Use environment variable for Redis URL
+redis_url = os.getenv('KV_URL', 'redis://localhost:6379/0')
+app.config['SESSION_REDIS'] = redis.from_url(redis_url)
 
-#Configuring the file uploads
-app.config["UPLOAD_FOLDER"]='./static/Uploads'
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
-#Email sender congiguration
+# Configuring the database
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ECHO"] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
+
+# Configuring the file uploads
+app.config["UPLOAD_FOLDER"] = './static/Uploads'
+
+# Email sender configuration
 app.config["SENDER_NAME"] = "Leave Management System"
 app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke"
-app.static_folder = 'static' 
+app.static_folder = 'static'
 
-#Initializing the migration
-migrate=Migrate(app, db)
+# Initializing the migration
+migrate = Migrate(app, db)
 db.init_app(app)
 
 CORS(app)
 
-#Wrapping the app as an API instance
-api=Api(app)
+# Wrapping the app as an API instance
+api = Api(app)
 
 #Index resource
 class Index(Resource):
