@@ -20,7 +20,7 @@ app.config["SECRET_KEY"]=os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"]="redis"
 app.config["SESSION_PERMANENT"]=True
 app.config["SESSION_USER_SIGNER"]=False
-app.config["SESSION_REDIS"]=redis.from_url(os.getenv("KV_URL"))
+app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379)
 app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(minutes=30)
 
 #Configuring the database
