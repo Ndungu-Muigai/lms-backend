@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, jsonify, session, send_from_directory
+from flask import Flask, make_response, request, jsonify, session
 from flask_migrate import Migrate
 from flask_cors import CORS
 from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword   
@@ -7,7 +7,7 @@ from schema import EmployeeSchema, LeaveDaysSchema, LeaveApplicationsSchema
 import hashlib
 from datetime import datetime, date, timedelta
 from werkzeug.utils import secure_filename
-import uuid as uuid
+import uuid
 import os
 from Mail.credentials import send_login_credentials
 from Mail.reset import send_otp
@@ -48,6 +48,7 @@ CORS(app)
 
 # Wrapping the app as an API instance
 api = Api(app)
+
 
 #Index resource
 class Index(Resource):
