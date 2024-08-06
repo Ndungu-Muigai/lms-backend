@@ -35,7 +35,7 @@ app.config["UPLOAD_FOLDER"] = './static/Uploads'
 
 # Email sender configuration
 app.config["SENDER_NAME"] = "Leave Management System"
-app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke"
+app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke" 
 app.static_folder = 'static'
 
 # Initializing the migration
