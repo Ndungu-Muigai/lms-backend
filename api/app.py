@@ -20,12 +20,12 @@ import redis
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
-app.config["SESSION_PERMANENT"] = True
-app.config["SESSION_USER_SIGNER"] = False
+# Increase the timeout and use a connection pool
+redis_pool = redis.ConnectionPool(host='localhost', port=6379, db=0, decode_responses=True, socket_timeout=5)
+app.config['SESSION_REDIS'] = redis.StrictRedis(connection_pool=redis_pool)
+app.config['SESSION_PERMANENT'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
-app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_URL"))
-
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
 # Configuring the database
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
