@@ -2,7 +2,6 @@ from flask import Flask, make_response, request, jsonify, session, send_from_dir
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword   
 from flask_restful import Api, Resource
 from schema import EmployeeSchema, LeaveDaysSchema, LeaveApplicationsSchema
@@ -51,22 +50,6 @@ Session(app)
 # Wrapping the app as an API instance
 api = Api(app)
 
-#Configuring flask login
-login_manager=LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-@login_manager.user_loader
-def load_user(user_id):
-    return Employee.query.get(int(user_id))
-
-#Index resource
-class Index(Resource):
-    def get(self):
-        return make_response(jsonify({"message": "Welcome to the Mobikey LMS backend"}),200)
-
-api.add_resource(Index, "/")
-
 #Login resource
 class Login(Resource):
     def post(self):
@@ -79,13 +62,17 @@ class Login(Resource):
 
         #If the username doesn't exists, return an error
         if not employee:
-            return make_response(jsonify({"error": "Incorrect username!"}), 401)
+            return make_response(jsonify({"error": "Incorrect username!"}), 409)
         
         #If the password is incorrect, return an error
         elif employee.password!= hashlib.md5(password.encode("utf-8")).hexdigest():
-            return make_response(jsonify({"error": "Incorrect password!"}), 401)
+            return make_response(jsonify({"error": "Incorrect password!"}), 409)
         
-        login_user(employee)
+        #Creating sessions that will be used later on in the program 
+        session["employee_id"]=employee.id
+        session["employee_role"]=employee.role
+        session["employee_department"]=employee.department
+        session["employee_section"]=employee.section
 
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
@@ -98,13 +85,11 @@ api.add_resource(Login, "/login")
 
 #Resource to update password
 class UpdatePassword(Resource):
-    @login_required
     def post(self):
 
         #Getting the ID of the employee
-        employee_id=current_user.id
+        employee_id=session.get("employee_id")
 
-        print(employee_id)
         #Getting the form data
         password=request.json["new_password"]
         confirm_password=request.json["confirm_password"]
@@ -226,13 +211,11 @@ api.add_resource(UpdatePasswordOTP, "/update-password-with-otp")
 
 #Dashboard resource
 class Dashboard(Resource):
-    @login_required
     def get(self):
 
         #Getting the ID of the current logged in user
-        employee_id=current_user.id
+        employee_id=session.get("employee_id")
 
-        print(employee_id)
         #If a user is not logged in, return an error
         if not employee_id:
             return make_response(jsonify({"error": "Kindly login to continue"}))
@@ -289,15 +272,14 @@ class Dashboard(Resource):
             }
         ))
 
-api.add_resource(Dashboard, "/dashboard")
+api.add_resource(Dashboard, "/home")
 
 #Leave applications resource
 class LeaveApplications(Resource):
-    @login_required
     def get(self):
 
         #Get the currently logged in user
-        employee_id=current_user.id
+        employee_id=session.get("employee_id")
 
         #Get the user's leave applications and create a dict of it
         leave_applications=LeaveApplication.query.filter_by(employee_id=employee_id).all()
@@ -319,11 +301,10 @@ class LeaveApplications(Resource):
             }
         ),200)
     
-    @login_required
     def post(self):
 
         # Get the employee ID from the session
-        employee_id = current_user.id
+        employee_id = session.get("employee_id")
 
         # Getting the values from the form
         leave_type = request.form.get("leave_type")
@@ -425,7 +406,6 @@ api.add_resource(LeaveApplications, "/leave-applications")
 
 #Individual leave application resource
 class LeaveApplicationByID(Resource):
-    @login_required
     def get(self, id):
 
         #Querying the database to get the specific application
@@ -450,29 +430,28 @@ api.add_resource(LeaveApplicationByID, "/leave-applications/<int:id>")
 
 #All employee leave requests
 class AllRequests(Resource):
-    @login_required
     def get(self):
         #Getting all the requests
-        leave_requests=LeaveApplication.query.filter_by(status="Approved").all()
+        leave_requests=LeaveApplication.query.all()
 
         #Looping over all the requests and updating the status variable
-        # request_list=[]
-        # for request in leave_requests:
+        request_list=[]
+        for request in leave_requests:
 
-        #     if request.hod_status == "Approved" and request.hr_status == "Approved" and request.gm_status=="Approved":
-        #         request.status="Approved"
-        #         request_list.append(request)
+            if request.hod_status == "Approved" and request.hr_status == "Approved" and request.gm_status=="Approved":
+                request.status="Approved"
+                request_list.append(request)
 
-        #     elif request.hod_status == "Pending" or request.hr_status == "Pending" or request.gm_status=="Pending":
-        #         request.status="Pending"
-        #         request_list.append(request)
+            elif request.hod_status == "Pending" or request.hr_status == "Pending" or request.gm_status=="Pending":
+                request.status="Pending"
+                request_list.append(request)
 
-        #     else:
-        #         request.status="Rejected"
-        #         request_list.append(request)
+            else:
+                request.status="Rejected"
+                request_list.append(request)
 
         #Creating a dict of the requests
-        leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(leave_requests, many=True)
+        leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(request_list, many=True)
 
         return make_response(leave_requests_dict, 200)
 
@@ -480,13 +459,12 @@ api.add_resource(AllRequests, "/employee-requests")
 
 #All pending employee requests
 class PendingEmployeeRequests(Resource):
-    @login_required
     def get(self):
         #Getting the session data which will be used to query the leave applications table
-        employee_id=current_user.id
-        role=current_user.role
-        department=current_user.department
-        section=current_user.section
+        employee_id=session.get("employee_id")
+        role=session.get("employee_role")
+        department=session.get("employee_department")
+        section=session.get("employee_section")
 
         #Displaying the requests based on the user's role
         if role == "HOD":
@@ -520,7 +498,6 @@ api.add_resource(PendingEmployeeRequests, "/pending-employee-requests")
 
 #Individual pending employee requests 
 class PendingEmployeeRequestsByID(Resource):
-    @login_required
     def get(self, id):
         #Querying the database to get the individual request and creating a dict of it
         request=LeaveApplication.query.filter_by(id=id).first()
@@ -533,13 +510,12 @@ class PendingEmployeeRequestsByID(Resource):
 
         return make_response(response, 200)
     
-    @login_required
     #Patch request to update the request
     def patch(self, id):
         #Getting the approval status (Approved or Rejected) from the frontend
         status=request.json["status"]
         #Getting the role of the currently logged in employee
-        role=current_user.role
+        role=session.get("employee_role")
         
         #Getting the request from the database
         application=LeaveApplication.query.filter_by(id=id).first()
@@ -603,13 +579,12 @@ api.add_resource(GetFile, "/static/<path:filename>")
 
 #All employees resource
 class Employees(Resource):
-    @login_required
     def get(self):
         #Getting the employee id
-        employee_id=current_user.id
+        employee_id=session.get("employee_id")
 
         #Getting the role of the currently logged in user
-        employee_role=current_user.role
+        employee_role=session.get("employee_role")
         
         #If the role is not HR, return an error
         if employee_role != "HR":
@@ -625,7 +600,6 @@ class Employees(Resource):
             }
         ), 200)
     
-    @login_required
     def post(self):
 
         #Getting the data from the form
@@ -648,7 +622,7 @@ class Employees(Resource):
         
         #Checking if the username exists in the database. If it does, return an error
         elif Employee.query.filter_by(username=username).first():
-            return make_response(jsonify({"error" : "An account with the given names already exists"}),409)
+            return make_response(jsonify({"error" : "Username already exists"}),409)
         
         #Creating the account details
         hashed_password=hashlib.md5(password.encode("utf-8")).hexdigest()
@@ -682,7 +656,7 @@ api.add_resource(Employees, "/employees-data")
 
 #Resource for fetching specific employee's data
 class EmployeeByID(Resource):
-    @login_required
+
     def get(self, id):
         #Getting the individual employee
         employee=Employee.query.filter_by(id=id).first()
@@ -707,7 +681,6 @@ class EmployeeByID(Resource):
 
         return make_response(response_dict, 200)
     
-    @login_required
     def patch(self, id):
         #Querying the database to check if the employee exists
         employee_to_update=Employee.query.filter_by(id=id).first()
@@ -760,10 +733,9 @@ api.add_resource(EmployeeByID, "/employees-data/<int:id>")
 
 #Profile resource
 class Profile(Resource):
-    @login_required
     def get(self):
         #Getting the ID of the current logged in user
-        employee_id=current_user.id
+        employee_id=session.get("employee_id")
 
         #If no one is logged in, return an error
         if not employee_id:
@@ -775,7 +747,6 @@ class Profile(Resource):
         return make_response(employee_details, 200)
     
     #Password update functionality in the profile page
-    @login_required
     def post(self):
 
         #Getting the attributes from the form
@@ -784,7 +755,7 @@ class Profile(Resource):
         confirm_password=request.json["confirm_password"]
 
         #Getting the current logged in employee
-        employee=Employee.query.filter(Employee.id==current_user.id).first()
+        employee=Employee.query.filter(Employee.id==session.get("employee_id")).first()
 
         #Hashing the password 
         hashed_password=hashlib.md5(new_password.encode()).hexdigest()
@@ -812,11 +783,9 @@ api.add_resource(Profile, "/profile")
 
 #Logout resource
 class Logout(Resource):
-    @login_required
     def post(self):
-        logout_user()
-        # #Clear all sessions
-        # session.clear()
+        #Clear all sessions
+        session.clear()
 
         #Return a response
         return make_response(jsonify({"success": "Logged out successfully"}), 200)
