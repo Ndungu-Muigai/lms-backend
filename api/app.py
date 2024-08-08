@@ -279,7 +279,7 @@ class Dashboard(Resource):
             }
         ))
 
-api.add_resource(Dashboard, "/home")
+api.add_resource(Dashboard, "/dashboard")
 
 #Leave applications resource
 class LeaveApplications(Resource):
