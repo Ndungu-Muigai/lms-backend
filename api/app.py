@@ -86,14 +86,6 @@ class Login(Resource):
             return make_response(jsonify({"error": "Incorrect password!"}), 401)
         
         login_user(employee)
-        # #Creating sessions that will be used later on in the program 
-        # session["employee_id"]=employee.id
-        # session["employee_role"]=employee.role
-        # session["employee_department"]=employee.department
-        # session["employee_section"]=employee.section
-
-        # print(session["employee_id"])
-        print(current_user.id)
 
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
@@ -112,7 +104,7 @@ class UpdatePassword(Resource):
         #Getting the ID of the employee
         employee_id=current_user.id
 
-        print(employee_id)
+        
         #Getting the form data
         password=request.json["new_password"]
         confirm_password=request.json["confirm_password"]
@@ -240,12 +232,9 @@ class Dashboard(Resource):
         #Getting the ID of the current logged in user
         employee_id=current_user.id
 
-        print(employee_id)
         #If a user is not logged in, return an error
         if not employee_id:
             return make_response(jsonify({"error": "Kindly login to continue"}))
-
-        #If a user is logged in, fetch his/her data
 
         #Counting the leave applications and returning the response to the front end
         total_requests = LeaveApplication.query.filter(LeaveApplication.employee_id == employee_id).count()
