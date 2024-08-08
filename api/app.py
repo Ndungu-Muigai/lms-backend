@@ -1,6 +1,7 @@
 from flask import Flask, make_response, request, jsonify, session, send_from_directory
 from flask_session import Session
 from flask_migrate import Migrate
+from upstash_redis import Redis
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword   
@@ -18,9 +19,12 @@ from Generations.otp import get_otp
 import redis
 
 app = Flask(__name__)
+
+# Configuring redis
+redis=redis.Redis(host="witty-anemone-44477.upstash.io", port=6379, password=os.getenv("REDIS_PASSWORD"), ssl=True)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
-app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_URL"), socket_timeout=1000)
+app.config['SESSION_REDIS'] = Redis(host="witty-anemone-44477.upstash.io", port=6379, password=os.getenv("REDIS_PASSWORD"), ssl=True)
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
