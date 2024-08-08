@@ -1,4 +1,5 @@
-from flask import Flask, make_response, request, jsonify, session, send_from_directory
+from flask import Flask, make_response, request, jsonify, session
+from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
 from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword   
@@ -7,7 +8,7 @@ from schema import EmployeeSchema, LeaveDaysSchema, LeaveApplicationsSchema
 import hashlib
 from datetime import datetime, date, timedelta
 from werkzeug.utils import secure_filename
-import uuid as uuid
+import uuid
 import os
 from Mail.credentials import send_login_credentials
 from Mail.reset import send_otp
@@ -15,35 +16,38 @@ from Generations.password import random_password
 from Generations.otp import get_otp
 import redis
 
-app=Flask(__name__)
-app.config["SECRET_KEY"]=os.environ["SECRET_KEY"]
-app.config["SESSION_TYPE"]="redis"
-app.config["SESSION_PERMANENT"]=True
-app.config["SESSION_USER_SIGNER"]=False
-app.config["SESSION_REDIS"]=redis.from_url(os.getenv("KV_URL"))
-app.config["PERMANENT_SESSION_LIFETIME"]=timedelta(minutes=30)
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = True
+app.config["SESSION_USER_SIGNER"] = False
 
-#Configuring the database
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
-app.config["SQLALCHEMY_ECHO"]=False
-app.config["SQLALCHEMY_DATABASE_URI"]=os.getenv("SQLALCHEMY_DATABASE_URI")
+app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_URL"))
 
-#Configuring the file uploads
-app.config["UPLOAD_FOLDER"]='./static/Uploads'
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
-#Email sender congiguration
+# Configuring the database
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ECHO"] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
+
+# Configuring the file uploads
+app.config["UPLOAD_FOLDER"] = './static/Uploads'
+
+# Email sender configuration
 app.config["SENDER_NAME"] = "Leave Management System"
 app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke"
-app.static_folder = 'static' 
+app.static_folder = 'static'
 
-#Initializing the migration
-migrate=Migrate(app, db)
+# Initializing the migration
+migrate = Migrate(app, db)
 db.init_app(app)
 
 CORS(app)
 
-#Wrapping the app as an API instance
-api=Api(app)
+# Wrapping the app as an API instance
+api = Api(app)
+
 
 #Index resource
 class Index(Resource):
@@ -64,11 +68,11 @@ class Login(Resource):
 
         #If the username doesn't exists, return an error
         if not employee:
-            return make_response(jsonify({"error": "Incorrect username!"}), 409)
+            return make_response(jsonify({"error": "Incorrect username!"}), 401)
         
         #If the password is incorrect, return an error
         elif employee.password!= hashlib.md5(password.encode("utf-8")).hexdigest():
-            return make_response(jsonify({"error": "Incorrect password!"}), 409)
+            return make_response(jsonify({"error": "Incorrect password!"}), 401)
         
         #Creating sessions that will be used later on in the program 
         session["employee_id"]=employee.id
@@ -94,6 +98,7 @@ class UpdatePassword(Resource):
         #Getting the ID of the employee
         employee_id=session.get("employee_id")
 
+        print(employee_id)
         #Getting the form data
         password=request.json["new_password"]
         confirm_password=request.json["confirm_password"]
@@ -627,7 +632,7 @@ class Employees(Resource):
         
         #Checking if the username exists in the database. If it does, return an error
         elif Employee.query.filter_by(username=username).first():
-            return make_response(jsonify({"error" : "Username already exists"}),409)
+            return make_response(jsonify({"error" : "An account with the given names already exists"}),409)
         
         #Creating the account details
         hashed_password=hashlib.md5(password.encode("utf-8")).hexdigest()
