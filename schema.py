@@ -10,6 +10,7 @@ class EmployeeSchema(Schema):
     section=fields.Str(required=True)
     position=fields.Str(required=True)
     role=fields.Str(required=True)
+    created_at=fields.Date(required=True)
 
 class LeaveDaysSchema(Schema):
     # employee=fields.Nested(EmployeeSchema(only=("first_name", "last_name")), required=True)
