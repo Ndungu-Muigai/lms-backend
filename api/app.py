@@ -95,7 +95,7 @@ class UpdatePassword(Resource):
     def post(self):
 
         #Getting the ID of the employee
-        employee_id=r.get(int("employee_id"))
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the form data
         password=request.json["new_password"]
@@ -221,7 +221,7 @@ class Dashboard(Resource):
     def get(self):
 
         #Getting the ID of the current logged in user
-        employee_id_bytes = r.get("employee_id")
+        employee_id_bytes = r.get("employee_id").decode("utf-8")
 
         print(employee_id_bytes)
 
@@ -289,7 +289,7 @@ class LeaveApplications(Resource):
     def get(self):
 
         #Get the currently logged in user
-        employee_id=r.get(int("employee_id"))
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Get the user's leave applications and create a dict of it
         leave_applications=LeaveApplication.query.filter_by(employee_id=employee_id).all()
@@ -314,7 +314,7 @@ class LeaveApplications(Resource):
     def post(self):
 
         # Get the employee ID from the session
-        employee_id = r.get(int("employee_id"))
+        employee_id = r.get("employee_id").decode("utf-8")
 
         # Getting the values from the form
         leave_type = request.form.get("leave_type")
@@ -471,7 +471,7 @@ api.add_resource(AllRequests, "/employee-requests")
 class PendingEmployeeRequests(Resource):
     def get(self):
         #Getting the session data which will be used to query the leave applications table
-        employee_id=r.get(int("employee_id"))
+        employee_id=r.get("employee_id").decode("utf-8")
         role=r.get("employee_role")
         department=r.get("employee_department")
         section=r.get("employee_section")
@@ -591,7 +591,7 @@ api.add_resource(GetFile, "/static/<path:filename>")
 class Employees(Resource):
     def get(self):
         #Getting the employee id
-        employee_id=r.get(int("employee_id"))
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the role of the currently logged in user
         employee_role=r.get("employee_role")
@@ -745,7 +745,7 @@ api.add_resource(EmployeeByID, "/employees-data/<int:id>")
 class Profile(Resource):
     def get(self):
         #Getting the ID of the current logged in user
-        employee_id=r.get(int("employee_id"))
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #If no one is logged in, return an error
         if not employee_id:
@@ -765,7 +765,7 @@ class Profile(Resource):
         confirm_password=request.json["confirm_password"]
 
         #Getting the current logged in employee
-        employee=Employee.query.filter(Employee.id==r.get(int("employee_id"))).first()
+        employee=Employee.query.filter(Employee.id==r.get("employee_id").decode("utf-8")).first()
 
         #Hashing the password 
         hashed_password=hashlib.md5(new_password.encode()).hexdigest()
