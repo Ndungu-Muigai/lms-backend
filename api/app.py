@@ -20,7 +20,7 @@ import redis
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
-app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_URL"))
+app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_URL"), socket_timeout=1000)
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
