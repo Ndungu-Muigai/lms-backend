@@ -221,14 +221,15 @@ class Dashboard(Resource):
     def get(self):
 
         #Getting the ID of the current logged in user
-        employee_id=r.get(int(("employee_id")))
+        employee_id_bytes = r.get("employee_id")
 
         #If a user is not logged in, return an error
-        if not employee_id:
+        if not employee_id_bytes:
             return make_response(jsonify({"error": "Kindly login to continue"}))
 
         #If a user is logged in, fetch his/her data
-
+        employee_id = int(employee_id_bytes.decode("utf-8"))
+        
         #Counting the leave applications and returning the response to the front end
         total_requests = LeaveApplication.query.filter(LeaveApplication.employee_id == employee_id).count()
         approved_requests = LeaveApplication.query.filter(
