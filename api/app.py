@@ -46,6 +46,7 @@ db.init_app(app)
 
 CORS(app)
 
+Session(app)
 # Wrapping the app as an API instance
 api = Api(app)
 
