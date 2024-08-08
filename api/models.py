@@ -1,9 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from datetime import datetime
 
 db = SQLAlchemy()
 
-class Employee(db.Model):
+class Employee(db.Model, UserMixin):
     __tablename__ = "employees"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -31,6 +32,9 @@ class Employee(db.Model):
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+    
+    def get_id(self):
+        return str(self.id)
 
 class LeaveDays(db.Model):
     __tablename__ = "leave_days"
