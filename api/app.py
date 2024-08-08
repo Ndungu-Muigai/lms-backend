@@ -268,7 +268,7 @@ class Dashboard(Resource):
             {
                 "success": "Logged in successfully",
                 "full_name": employee.full_name(),
-                "role": r.get("employee_role"),
+                "role": r.get("employee_role").decode("utf-8"),
                 "leave_days":
                 {
                     "total_requests": total_requests,
@@ -389,7 +389,7 @@ class LeaveApplications(Resource):
             file_attachment=f"{leave_type}/{unique_file_name}"
 
         #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
-        employee_role=r.get("employee_role")
+        employee_role=r.get("employee_role").decode("utf-8")
         if employee_role == "HOD":
             new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
 
@@ -470,9 +470,9 @@ class PendingEmployeeRequests(Resource):
     def get(self):
         #Getting the session data which will be used to query the leave applications table
         employee_id=r.get("employee_id").decode("utf-8")
-        role=r.get("employee_role")
+        role=r.get("employee_role").decode("utf-8")
         department=r.get("employee_department")
-        section=r.get("employee_section")
+        section=r.get("employee_section").decode("utf-8")
 
         #Displaying the requests based on the user's role
         if role == "HOD":
@@ -523,7 +523,7 @@ class PendingEmployeeRequestsByID(Resource):
         #Getting the approval status (Approved or Rejected) from the frontend
         status=request.json["status"]
         #Getting the role of the currently logged in employee
-        role=r.get("employee_role")
+        role=r.get("employee_role").decode("utf-8")
         
         #Getting the request from the database
         application=LeaveApplication.query.filter_by(id=id).first()
@@ -592,7 +592,7 @@ class Employees(Resource):
         employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the role of the currently logged in user
-        employee_role=r.get("employee_role")
+        employee_role=r.get("employee_role").decode("utf-8")
         
         print(employee_role)
         #If the role is not HR, return an error
