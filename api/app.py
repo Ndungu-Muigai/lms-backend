@@ -22,7 +22,7 @@ app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 # Increase the timeout and use a connection pool
 redis_pool = redis.ConnectionPool(host=os.getenv("KV_URL"), db=0, decode_responses=True, socket_timeout=5)
-app.config['SESSION_REDIS'] = redis.StrictRedis(connection_pool=redis_pool)
+app.config['SESSION_REDIS'] = redis.from_url(os.getenv("KV_REST_API_URL"))
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
