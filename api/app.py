@@ -91,6 +91,7 @@ class Login(Resource):
         # session["employee_section"]=employee.section
 
         # print(session["employee_id"])
+        print(current_user.id)
 
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
