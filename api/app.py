@@ -50,6 +50,13 @@ Session(app)
 # Wrapping the app as an API instance
 api = Api(app)
 
+#Index resource
+class Index(Resource):
+    def get(self):
+        return make_response(jsonify({"message": "Welcome to the Mobikey LMS backend"}))
+    
+api.add_resource(Index, "/")
+
 #Login resource
 class Login(Resource):
     def post(self):
