@@ -440,7 +440,7 @@ api.add_resource(LeaveApplicationByID, "/leave-applications/<int:id>")
 class ApprovedRequests(Resource):
     def get(self):
         #Getting all the requests
-        leave_requests=LeaveApplication.query.filter_by(request.hod_status=="Approved" and request.gm_status=="Approved" and request.hr_status=="Approved").all()
+        leave_requests=LeaveApplication.query.filter_by(hod_status=="Approved" and gm_status=="Approved" and hr_status=="Approved").all()
 
         #Looping over all the requests and updating the status variable
         # request_list=[]
