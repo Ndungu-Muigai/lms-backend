@@ -463,7 +463,7 @@ class ApprovedRequests(Resource):
 
         return make_response(jsonify(leave_requests_dict), 200)
 
-api.add_resource(ApprovedRequests, "/employee-requests")
+api.add_resource(ApprovedRequests, "/approved-requests")
 
 #All pending employee requests
 class PendingEmployeeRequests(Resource):
