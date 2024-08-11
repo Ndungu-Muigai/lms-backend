@@ -592,8 +592,11 @@ class Employees(Resource):
         if employee_role != "HR":
             return make_response(jsonify({"error": "You do not have the rights to do that"}), 405)
         
+        #Getting the HR instance
+        hr=Employee.query.filter_by(id=employee_id).all()
+        
         #Getting all employees from the database and creating a dict 
-        employees=Employee.query.filter(Employee.id != employee_id).all()
+        employees=Employee.query.filter(Employee.id != employee_id, Employee.country == hr.country).all()
         employee_dict=EmployeeSchema().dump(employees, many=True)
         return make_response(jsonify(
             {
