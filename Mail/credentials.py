@@ -18,7 +18,7 @@ def send_login_credentials(first_name, last_name, email, username, password):
     <p>Use the login credentials below to login: </p>
     <h4>Username: {username}</h4>
     <h4>Password: {password}</h4>
-    <h4>Login Link: <a href='https://mobikey-lms-frontend.vercel.app/' target='_blank'>Leave Management System</a></h4>
+    <h4>Login Link: <a href='https://mobikey-lms.vercel.app/' target='_blank'>Leave Management System</a></h4>
     <b>Kindly do not share your login details</b><br><br>
 
     <b>NB:This is an system generated email. Please DO NOT reply to this email thread.</b>

@@ -18,7 +18,7 @@ def send_otp(email, otp, first_name, last_name):
     <p style="color: black;">Your One-Time Password (OTP) is: <b>{otp}</b></p>
     <b style="color: black;">This OTP expires after 15minutes. Kindly use it before then.</b>
     <p style="color: black;">Please use this OTP to reset your account password</p>
-    <b style="color: black;">If this request was not initiated by you, please <a href='https://mobikey-lms-frontend.vercel.app/' target='_blank'>login</a>and update your password immediately to protect your account</b>
+    <b style="color: black;">If this request was not initiated by you, please <a href='https://mobikey-lms.vercel.app/' target='_blank'>login</a>and update your password immediately to protect your account</b>
 	"""
     to= [{"name": f"{first_name} {last_name}", "email": email}]
     send_email=sib_api_v3_sdk.SendSmtpEmail(to=to, html_content=content,sender=sender, subject=subject)
