@@ -609,7 +609,7 @@ class Employees(Resource):
         last_name=request.json["last_name"]
         email=request.json["email"]
         country=request.json["country"]
-        phone=request.json[""]
+        phone=request.json["phone"]
         gender=request.json["gender"]
         department=request.json["department"]
         # country=request.json["country"]
