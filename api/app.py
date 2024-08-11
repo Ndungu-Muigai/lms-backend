@@ -585,6 +585,9 @@ class Employees(Resource):
         #Getting the employee id
         employee_id=r.get("employee_id").decode("utf-8")
 
+        #Getting the employee country
+        employee_country=r.get("employee_country").decode("utf-8")
+
         #Getting the role of the currently logged in user
         employee_role=r.get("employee_role").decode("utf-8")
         
@@ -592,11 +595,8 @@ class Employees(Resource):
         if employee_role != "HR":
             return make_response(jsonify({"error": "You do not have the rights to do that"}), 405)
         
-        #Getting the HR instance
-        hr=Employee.query.filter_by(id=employee_id).all()
-        
         #Getting all employees from the database and creating a dict 
-        employees=Employee.query.filter(Employee.id != employee_id, Employee.country == hr.country).all()
+        employees=Employee.query.filter(Employee.id != employee_id, Employee.country == employee_country).all()
         employee_dict=EmployeeSchema().dump(employees, many=True)
         return make_response(jsonify(
             {
