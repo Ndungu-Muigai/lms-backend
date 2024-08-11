@@ -10,10 +10,11 @@ class Employee(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     first_name=db.Column(db.String, nullable=False)
     last_name=db.Column(db.String, nullable=False)
-    gender=db.Column(db.String, nullable=False)
     email=db.Column(db.String, unique=True, nullable=False)
+    country=db.Column(db.String, unique=False, nullable=False)
+    phone=db.Column(db.String, unique=True, nullable=False)
+    gender=db.Column(db.String, nullable=False)
     username=db.Column(db.String, unique=True, nullable=False)
-    section=db.Column(db.String, nullable=False)
     department=db.Column(db.String, nullable=False)
     position=db.Column(db.String, nullable=False)
     role=db.Column(db.String, nullable=False)
@@ -25,7 +26,7 @@ class Employee(db.Model):
     leave_applications=db.relationship("LeaveApplication", backref="employee")
 
     def __repr__(self):
-        return f"Employee name: {self.first_name} {self.last_name}\nEmail address: {self.email}\nGender: {self.gender}\nSection: {self.section}\nDepartment: {self.department}\nPosition: {self.position}"
+        return f"Employee name: {self.first_name} {self.last_name}\nEmail address: {self.email}\nGender: {self.gender}\nCountry: {self.country}\Phone number: {self.phone}\nDepartment: {self.department}\nPosition: {self.position}"
     
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
@@ -50,16 +51,16 @@ class LeaveApplication(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     employee_id=db.Column(db.Integer, db.ForeignKey('employees.id'))
-    leave_type=db.Column(db.Enum("Sick","Maternity","Paternity", "Normal"),nullable=False)	
+    leave_type=db.Column(db.Enum("Sick","Maternity","Paternity", "Normal", name="leave_type_enum"),nullable=False)	
     leave_duration=db.Column(db.String, nullable=False)
     start_date=db.Column(db.Date, nullable=False)
     end_date=db.Column(db.Date, nullable=False)
     total_days=db.Column(db.Float, nullable=False)
     file_attachment=db.Column(db.String, nullable=True)
     reason=db.Column(db.String, nullable=True)
-    hod_status=db.Column(db.Enum("Pending", "Approved", "Rejected"), nullable=False, default="Pending")
-    hr_status=db.Column(db.Enum("Pending", "Approved", "Rejected"), nullable=False, default="Pending")
-    gm_status=db.Column(db.Enum("Pending", "Approved", "Rejected"), nullable=False, default="Pending")
+    hod_status=db.Column(db.Enum("Pending", "Approved", "Rejected", name="hod_status_enum"), nullable=False, default="Pending")
+    hr_status=db.Column(db.Enum("Pending", "Approved", "Rejected", name="hr_status_enum"), nullable=False, default="Pending")
+    gm_status=db.Column(db.Enum("Pending", "Approved", "Rejected", name="gm_status_enum"), nullable=False, default="Pending")
 
 class OneTimePassword(db.Model):
 

@@ -1,8 +1,8 @@
-"""Added a name attribute to the Enums
+"""Changed the database URL and modified the employees table to include the country and phone number
 
-Revision ID: 65d7085094c8
+Revision ID: 0a7c80fe8169
 Revises: 
-Create Date: 2024-07-28 10:20:50.150508
+Create Date: 2024-08-11 15:24:49.565448
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '65d7085094c8'
+revision = '0a7c80fe8169'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,10 +22,11 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('first_name', sa.String(), nullable=False),
     sa.Column('last_name', sa.String(), nullable=False),
-    sa.Column('gender', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
+    sa.Column('country', sa.String(), nullable=False),
+    sa.Column('phone', sa.String(), nullable=False),
+    sa.Column('gender', sa.String(), nullable=False),
     sa.Column('username', sa.String(), nullable=False),
-    sa.Column('section', sa.String(), nullable=False),
     sa.Column('department', sa.String(), nullable=False),
     sa.Column('position', sa.String(), nullable=False),
     sa.Column('role', sa.String(), nullable=False),
@@ -34,6 +35,7 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('phone'),
     sa.UniqueConstraint('username')
     )
     op.create_table('otp',
@@ -46,16 +48,16 @@ def upgrade():
     op.create_table('leave_applications',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('employee_id', sa.Integer(), nullable=True),
-    sa.Column('leave_type', sa.Enum('Sick', 'Maternity', 'Paternity', 'Normal', name='leave_type'), nullable=False),
+    sa.Column('leave_type', sa.Enum('Sick', 'Maternity', 'Paternity', 'Normal', name='leave_type_enum'), nullable=False),
     sa.Column('leave_duration', sa.String(), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
     sa.Column('end_date', sa.Date(), nullable=False),
     sa.Column('total_days', sa.Float(), nullable=False),
     sa.Column('file_attachment', sa.String(), nullable=True),
     sa.Column('reason', sa.String(), nullable=True),
-    sa.Column('hod_status', sa.Enum('Pending', 'Approved', 'Rejected', name='hod_status'), nullable=False),
-    sa.Column('hr_status', sa.Enum('Pending', 'Approved', 'Rejected', name='hr_status'), nullable=False),
-    sa.Column('gm_status', sa.Enum('Pending', 'Approved', 'Rejected', name='gm_status'), nullable=False),
+    sa.Column('hod_status', sa.Enum('Pending', 'Approved', 'Rejected', name='hod_status_enum'), nullable=False),
+    sa.Column('hr_status', sa.Enum('Pending', 'Approved', 'Rejected', name='hr_status_enum'), nullable=False),
+    sa.Column('gm_status', sa.Enum('Pending', 'Approved', 'Rejected', name='gm_status_enum'), nullable=False),
     sa.ForeignKeyConstraint(['employee_id'], ['employees.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

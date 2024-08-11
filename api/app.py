@@ -79,7 +79,7 @@ class Login(Resource):
         r.set("employee_id",employee.id)
         r.set("employee_role",employee.role)
         r.set("employee_department",employee.department)
-        r.set("employee_section",employee.section)
+        r.set("employee_country",employee.country)
 
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
@@ -466,7 +466,7 @@ class PendingEmployeeRequests(Resource):
         employee_id=r.get("employee_id").decode("utf-8")
         role=r.get("employee_role").decode("utf-8")
         department=r.get("employee_department")
-        section=r.get("employee_section").decode("utf-8")
+        country=r.get("employee_country").decode("utf-8")
 
         #Displaying the requests based on the user's role
         if role == "HOD":
@@ -474,7 +474,7 @@ class PendingEmployeeRequests(Resource):
                 LeaveApplication.hod_status == "Pending",
                 LeaveApplication.employee_id != employee_id,
                 Employee.department == department,
-                Employee.section == section
+                Employee.country == country
             ).all()
 
         elif role == "GM":
@@ -482,7 +482,7 @@ class PendingEmployeeRequests(Resource):
                 LeaveApplication.hod_status == "Approved",
                 LeaveApplication.gm_status == "Pending",
                 LeaveApplication.employee_id != employee_id,
-                # Employee.section == section
+                # Employee.country == country
             ).all()
 
         elif role == "HR":
@@ -608,9 +608,11 @@ class Employees(Resource):
         first_name=request.json["first_name"]
         last_name=request.json["last_name"]
         email=request.json["email"]
+        country=request.json["country"]
+        phone=request.json[""]
         gender=request.json["gender"]
         department=request.json["department"]
-        section=request.json["section"]
+        # country=request.json["country"]
         position=request.json["position"]
         role=request.json["role"]
 
@@ -622,13 +624,17 @@ class Employees(Resource):
         if Employee.query.filter_by(email=email).first():
             return make_response(jsonify({"error" : "Email already exists"}),409)
         
+        #Checking if the phone number exists in the database. If it does, return an error
+        if Employee.query.filter_by(phone=phone).first():
+            return make_response(jsonify({"error" : "Phone number already exists"}),409)
+        
         #Checking if the username exists in the database. If it does, return an error
         elif Employee.query.filter_by(username=username).first():
             return make_response(jsonify({"error" : "Username already exists"}),409)
         
         #Creating the account details
         hashed_password=hashlib.md5(password.encode("utf-8")).hexdigest()
-        new_employee=Employee(first_name=first_name, username=username, password=hashed_password, last_name=last_name, gender=gender, department=department, section=section, role=role, position=position, email=email)
+        new_employee=Employee(first_name=first_name, username=username, password=hashed_password, last_name=last_name, gender=gender, department=department, country=country, phone=phone, role=role, position=position, email=email)
 
         #Sending the email with the login credentials
         send_login_credentials(last_name=last_name, username=username, first_name=first_name, email=email, password=password)
@@ -788,7 +794,7 @@ class Logout(Resource):
     def post(self):
         #Clear all sessions
         session.clear()
-        r.delete("employee_id","employee_department","employee_role","employee_section")
+        r.delete("employee_id","employee_department","employee_role","employee_country")
         #Return a response
         return make_response(jsonify({"success": "Logged out successfully"}), 200)
     
