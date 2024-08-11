@@ -612,7 +612,6 @@ class Employees(Resource):
         phone=request.json["phone"]
         gender=request.json["gender"]
         department=request.json["department"]
-        # country=request.json["country"]
         position=request.json["position"]
         role=request.json["role"]
 
