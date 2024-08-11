@@ -1,8 +1,8 @@
 """Changed the database URL and modified the employees table to include the country and phone number
 
-Revision ID: 0a7c80fe8169
+Revision ID: 4667d59fa95e
 Revises: 
-Create Date: 2024-08-11 15:24:49.565448
+Create Date: 2024-08-11 16:17:43.138517
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0a7c80fe8169'
+revision = '4667d59fa95e'
 down_revision = None
 branch_labels = None
 depends_on = None
