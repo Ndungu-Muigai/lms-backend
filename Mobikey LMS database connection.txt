@@ -1,0 +1,1 @@
+psql 'postgres://avnadmin:AVNS_4MbuMW080MZaYNA3GMU@mobikey-lms-ndungu-muigai.l.aivencloud.com:11021/defaultdb?sslmode=require'
