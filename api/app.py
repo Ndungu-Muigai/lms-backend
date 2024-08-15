@@ -465,7 +465,7 @@ class PendingEmployeeRequests(Resource):
         #Getting the session data which will be used to query the leave applications table
         employee_id=r.get("employee_id").decode("utf-8")
         role=r.get("employee_role").decode("utf-8")
-        department=r.get("employee_department")
+        department=r.get("employee_department").decode("utf-8")
         country=r.get("employee_country").decode("utf-8")
 
         #Displaying the requests based on the user's role
@@ -482,7 +482,7 @@ class PendingEmployeeRequests(Resource):
                 LeaveApplication.hod_status == "Approved",
                 LeaveApplication.gm_status == "Pending",
                 LeaveApplication.employee_id != employee_id,
-                # Employee.country == country
+                Employee.country == country
             ).all()
 
         elif role == "HR":
@@ -491,6 +491,8 @@ class PendingEmployeeRequests(Resource):
                 LeaveApplication.gm_status == "Approved",
                 LeaveApplication.hr_status == "Pending",
                 LeaveApplication.employee_id != employee_id,
+                Employee.country == country
+
             ).all()
 
         #Creating a response will the fetched requests
