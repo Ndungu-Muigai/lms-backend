@@ -311,7 +311,7 @@ class Dashboard(Resource):
                     "pending_requests": pending_requests
                 },
                 "upcoming_leave": upcoming_schema,
-                "pending_requests": pending_requests
+                "pending_requests_count": pending_requests
             }
         ))
 
