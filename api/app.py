@@ -264,6 +264,39 @@ class Dashboard(Resource):
         ).all()
 
         upcoming_schema = LeaveApplicationsSchema(only=("id", "employee", "start_date", "end_date", "total_days")).dump(upcoming, many=True)
+        
+        #Getting the pending leave requests count
+        role=r.get("employee_role").decode("utf-8")
+        department=r.get("employee_department").decode("utf-8")
+        country=r.get("employee_country").decode("utf-8")
+
+        #Getting the requests based on the user's role
+        if role == "HOD":
+            pending_requests = LeaveApplication.query.join(Employee).filter(
+                LeaveApplication.hod_status == "Pending",
+                LeaveApplication.employee_id != employee_id,
+                Employee.department == department,
+                Employee.country == country
+            ).count()
+
+        elif role == "GM":
+            pending_requests = LeaveApplication.query.join(Employee).filter(
+                LeaveApplication.hod_status == "Approved",
+                LeaveApplication.gm_status == "Pending",
+                LeaveApplication.employee_id != employee_id,
+                Employee.country == country
+            ).count()
+
+        elif role == "HR":
+            pending_requests = LeaveApplication.query.filter(
+                LeaveApplication.hod_status == "Approved",
+                LeaveApplication.gm_status == "Approved",
+                LeaveApplication.hr_status == "Pending",
+                LeaveApplication.employee_id != employee_id,
+                Employee.country == country
+
+            ).count()
+        
         #Creating the response to the front end
         return make_response(jsonify(
             {
@@ -277,7 +310,8 @@ class Dashboard(Resource):
                     "rejected_requests":  rejected_requests,
                     "pending_requests": pending_requests
                 },
-                "upcoming_leave": upcoming_schema
+                "upcoming_leave": upcoming_schema,
+                "pending_requests": pending_requests
             }
         ))
 
