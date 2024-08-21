@@ -250,13 +250,20 @@ class Dashboard(Resource):
         #Getting the currently logged in employee so that we can return his.her full name
         employee=Employee.query.filter_by(id=employee_id).first()
 
-        #Getting today's date to only filter applications who's start date is greater than or equal to today in the upcoming department leave's table
-        today_date=date.today()
+        # Getting today's date
+        today_date = date.today()
 
-        #Getting upcoming department leaves
-        upcoming = LeaveApplication.query.join(Employee).filter(Employee.department == employee.department, LeaveApplication.end_date <= today_date, LeaveApplication.hod_status=="Approved", LeaveApplication.gm_status=="Approved", LeaveApplication.hr_status=="Approved").all()
-        upcoming_schema=LeaveApplicationsSchema(only=("id" ,"employee","start_date", "end_date","total_days")).dump(upcoming, many=True)
+        # Getting leave applications where today's date is between start_date and end_date
+        upcoming = LeaveApplication.query.join(Employee).filter(
+            Employee.department == employee.department,
+            LeaveApplication.start_date <= today_date,
+            LeaveApplication.end_date >= today_date,
+            LeaveApplication.hod_status == "Approved",
+            LeaveApplication.gm_status == "Approved",
+            LeaveApplication.hr_status == "Approved"
+        ).all()
 
+        upcoming_schema = LeaveApplicationsSchema(only=("id", "employee", "start_date", "end_date", "total_days")).dump(upcoming, many=True)
         #Creating the response to the front end
         return make_response(jsonify(
             {
