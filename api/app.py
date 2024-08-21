@@ -272,7 +272,7 @@ class Dashboard(Resource):
 
         #Getting the requests based on the user's role
         if role == "HOD":
-            pending_requests = LeaveApplication.query.join(Employee).filter(
+            pending_requests_count = LeaveApplication.query.join(Employee).filter(
                 LeaveApplication.hod_status == "Pending",
                 LeaveApplication.employee_id != employee_id,
                 Employee.department == department,
@@ -280,7 +280,7 @@ class Dashboard(Resource):
             ).count()
 
         elif role == "GM":
-            pending_requests = LeaveApplication.query.join(Employee).filter(
+            pending_requests_count = LeaveApplication.query.join(Employee).filter(
                 LeaveApplication.hod_status == "Approved",
                 LeaveApplication.gm_status == "Pending",
                 LeaveApplication.employee_id != employee_id,
@@ -288,7 +288,7 @@ class Dashboard(Resource):
             ).count()
 
         elif role == "HR":
-            pending_requests = LeaveApplication.query.filter(
+            pending_requests_count = LeaveApplication.query.filter(
                 LeaveApplication.hod_status == "Approved",
                 LeaveApplication.gm_status == "Approved",
                 LeaveApplication.hr_status == "Pending",
@@ -311,7 +311,7 @@ class Dashboard(Resource):
                     "pending_requests": pending_requests
                 },
                 "upcoming_leave": upcoming_schema,
-                "pending_requests_count": pending_requests
+                "pending_requests_count": pending_requests_count
             }
         ))
 
