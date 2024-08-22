@@ -425,16 +425,10 @@ class LeaveApplications(Resource):
             # Generating a unique ID for each file name
             unique_file_name = str(uuid.uuid1()) + "_" + file_name
 
-            #Specifying th folder where the files will be uploaded
-            folder_name="uploads/"
-
-            # Combine folder name with filename to create the full key
-            file_key = folder_name + unique_file_name
-
             # Saving the file to S3 bucket
             try:
                 # Upload the file to S3 and get the URL
-                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,file_key)
+                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,unique_file_name)
                 print("File uploaded")
             except Exception as e:
                 print(f"Error uploading file: {e}")
@@ -641,7 +635,7 @@ class GetFile(Resource):
     def get(self, filename):
         try:
             # Fetch the file from the S3 bucket
-            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=filename)
+            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"uploads/{filename}")
             # Use BytesIO to create a stream from the S3 file object
             file_stream = io.BytesIO(file_obj['Body'].read())
             return send_file(file_stream, as_attachment=True, attachment_filename=filename)
