@@ -875,33 +875,32 @@ api.add_resource(Profile, "/profile")
 class GetProfileImage(Resource):
     def get(self, profileImageName):
         try:
+            # Construct the S3 key
+            s3_key = f"images/{profileImageName}"
+            print(f"Fetching image from S3 with key: {s3_key}")
+            
             # Fetch the file from the S3 bucket
-            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
+            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=s3_key)
+            
             # Use BytesIO to create a stream from the S3 file object
             file_stream = io.BytesIO(file_obj['Body'].read())
-            return send_file(file_stream, as_attachment=True, attachment_filename=profileImageName)
+            
+            # Send the image as a response
+            return send_file(
+                file_stream,
+                as_attachment=False,  # Set to True if you want to force download
+                download_name=profileImageName,  # For Flask 2.x, use 'download_name'
+                mimetype=file_obj['ContentType']  # Set the content type to the correct MIME type
+            )
+        except s3.exceptions.NoSuchKey:
+            print(f"Error fetching file: No such key: {s3_key}")
+            return make_response(jsonify({"error": "File not found"}), 404)
         except Exception as e:
             print(f"Error fetching file: {e}")
-            return(make_response(jsonify({"error": "File not found"})),404)
-    # def get(self, profileImageName):
-    #     try:
-    #         # Fetch the image from the S3 bucket
-    #         s3_object = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
-            
-    #         # Read the image content and prepare it for sending
-    #         image_stream = io.BytesIO(s3_object['Body'].read())
-            
-    #         # Send the image as a response
-    #         return send_file(
-    #             image_stream,
-    #             as_attachment=False,  # Set to True if you want to force download
-    #             download_name=profileImageName,  # For Flask 2.x, use 'download_name'
-    #             mimetype=s3_object['ContentType']  # Set the content type to the correct MIME type
-    #         )
-    #     except Exception as e:
-    #         print(f"Error fetching image: {e}")
-    #         return make_response(jsonify({"error": f"Error fetching image: {e}"}), 500)
-api.add_resource(GetProfileImage, "/profile-image//<path:profileImageName>")
+            return make_response(jsonify({"error": "An unexpected error occurred"}), 500)
+
+# Register the resource with the API
+api.add_resource(GetProfileImage, "/profile-image/<path:profileImageName>")
 
 #Logout resource
 class Logout(Resource):
