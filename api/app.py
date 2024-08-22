@@ -877,7 +877,7 @@ class GetProfileImage(Resource):
         try:
         # Fetch the image from the S3 bucket
             s3_key = f"images/{profileImageName}"
-            s3_object = s3.get_object(Bucket=S3_BUCKET_NAME, Key=s3_key)
+            s3_object = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
             
             # Read the image content and prepare it for sending
             image_stream = io.BytesIO(s3_object['Body'].read())
