@@ -838,7 +838,7 @@ class Profile(Resource):
 
     def patch(self):
         # Get the image
-        profile_image = request.files.get("selectedImage")
+        profile_image = request.files.get("profile_image")
 
         print(profile_image)
         # # Check if the image was provided
