@@ -856,7 +856,7 @@ class Profile(Resource):
 
         # Uploading the file to S3
         try:
-            s3.upload_obj(profile_image, S3_BUCKET_NAME, s3_path)
+            s3.upload_file(profile_image, S3_BUCKET_NAME, s3_path)
             print("Profile image updated")
             return make_response(jsonify({"success": "Profile picture updated successfully!"}), 200)
         except Exception as e:
