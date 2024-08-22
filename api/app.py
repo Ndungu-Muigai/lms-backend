@@ -426,10 +426,13 @@ class LeaveApplications(Resource):
             # Generating a unique ID for each file name
             unique_file_name = str(uuid.uuid1()) + "_" + file_name
 
+            # Path in the S3 bucket
+            s3_path = f'uploads/{unique_file_name}'
+
             # Saving the file to S3 bucket
             try:
                 # Upload the file to S3 and get the URL
-                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,unique_file_name)
+                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,s3_path)
                 print("File uploaded")
             except Exception as e:
                 print(f"Error uploading file: {e}")
