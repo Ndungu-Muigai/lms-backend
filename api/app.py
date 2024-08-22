@@ -276,6 +276,9 @@ class Dashboard(Resource):
 
         upcoming_schema = LeaveApplicationsSchema(only=("id", "employee", "start_date", "end_date", "total_days")).dump(upcoming, many=True)
         
+        # Initializing pending_requests_count with a default value
+        pending_requests_count = 0
+        
         #Getting the pending leave requests count
         role=r.get("employee_role").decode("utf-8")
         department=r.get("employee_department").decode("utf-8")
