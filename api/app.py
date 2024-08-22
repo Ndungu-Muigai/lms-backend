@@ -872,17 +872,23 @@ class Profile(Resource):
 
 api.add_resource(Profile, "/profile")
 
-#Resource to get the profile image
 class GetProfileImage(Resource):
     def get(self, profileImageName):
         try:
-            #Fetch the image from the S3 bucket
-            image_obj=s3.get_fileobj(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
-            image_stream=io.BytesIO(image_obj["Body"].read())
-            return send_file(image_stream, as_attachment=True, attachment_filename=profileImageName)
+            # Fetch the image from the S3 bucket
+            image_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
+            image_stream = io.BytesIO(image_obj['Body'].read())
+            
+            # Send the file
+            return send_file(
+                image_stream,
+                as_attachment=True,
+                download_name=profileImageName,
+                mimetype=image_obj['ContentType']
+            )
         except Exception as e:
             print(f"Error fetching file: {e}")
-            return make_response(jsonify({"error": f"Error uploading profile image: {e}"}))
+            return make_response(jsonify({"error": f"Error uploading profile image: {e}"}), 500)
 
 api.add_resource(GetProfileImage, "/profile-image")
 
