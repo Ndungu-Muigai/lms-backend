@@ -854,10 +854,16 @@ class Profile(Resource):
         # Path to the folder in S3 bucket
         s3_path = f"images/{unique_profile_image_name}"
 
+        employee_id=r.get("employee_id").decode("utf-8")
+        employee=Employee.query.filter_by(id=employee_id).first()
+
         # Uploading the file to S3
         try:
-            s3.upload_file(profile_image, S3_BUCKET_NAME, s3_path)
+            s3.upload_fileobj(profile_image, S3_BUCKET_NAME, s3_path)
             print("Profile image updated")
+            employee.profile_picture=unique_profile_image_name
+            db.session.add(employee)
+            db.session.commit()
             return make_response(jsonify({"success": "Profile picture updated successfully!"}), 200)
         except Exception as e:
             print(f"Error uploading file: {e}")
