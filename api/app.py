@@ -836,7 +836,43 @@ class Profile(Resource):
 
         return make_response(jsonify({"success": "Password updated successfully"}))
 
+    def patch(self):
+        #Get the image
+        profile_image=request.files.get("selectedImage")
+
+        #Getting the file name
+        profile_image_filename=profile_image.filename
+
+        #Generating a unique file name
+        unique_profile_image_name=str(uuid.uuid1()) + "_" + profile_image_filename
+
+        #Path to the folder in S3 bucket
+        s3_path=f"images/{unique_profile_image_name}"
+
+        #Uploading the file to S3
+        try:
+            s3.upload_obj(profile_image,S3_BUCKET_NAME, s3_path)
+            print("Profile image updated")
+            return make_response(jsonify({"success": "Profile picture updated successfully!"}),200)
+        except Exception as e:
+            print(f"Error uploading file: {e}")
+            return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)       
+
 api.add_resource(Profile, "/profile")
+
+#Resource to get the profile image
+class GetProfileImage(Resource):
+    def get(self, profileImageName):
+        try:
+            #Fetch the image from the S3 bucket
+            image_obj=s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
+            image_stream=io.BytesIO(image_obj["Body"].read())
+            return send_file(image_stream, as_attachment=True, attachment_filename=profileImageName)
+        except Exception as e:
+            print(f"Error fetching file: {e}")
+            return make_response(jsonify({"error": f"Error uploading profile image: {e}"}))
+
+api.add_resource(GetProfileImage, "/profile-image")
 
 #Logout resource
 class Logout(Resource):

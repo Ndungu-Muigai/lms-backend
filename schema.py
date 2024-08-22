@@ -11,6 +11,7 @@ class EmployeeSchema(Schema):
     department=fields.Str(required=True)
     position=fields.Str(required=True)
     role=fields.Str(required=True)
+    profile_picture=fields.Str(required=True)
     created_at=fields.Date(required=True)
 
 class LeaveDaysSchema(Schema):
