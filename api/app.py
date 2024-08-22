@@ -431,8 +431,7 @@ class LeaveApplications(Resource):
                 s3.upload_fileobj(
                     file_attachment,
                     S3_BUCKET_NAME,
-                    unique_file_name,
-                    ExtraArgs={"ACL": "public-read"}
+                    unique_file_name
                 )
                 file_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{unique_file_name}"
                 print("File uploaded")
