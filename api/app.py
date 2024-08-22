@@ -875,21 +875,23 @@ api.add_resource(Profile, "/profile")
 class GetProfileImage(Resource):
     def get(self, profileImageName):
         try:
-            # Fetch the image from the S3 bucket
-            image_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
-            image_stream = io.BytesIO(image_obj['Body'].read())
+        # Fetch the image from the S3 bucket
+            s3_key = f"images/{profileImageName}"
+            s3_object = s3.get_object(Bucket=S3_BUCKET_NAME, Key=s3_key)
             
-            # Send the file
+            # Read the image content and prepare it for sending
+            image_stream = io.BytesIO(s3_object['Body'].read())
+            
+            # Send the image as a response
             return send_file(
                 image_stream,
-                as_attachment=True,
-                download_name=profileImageName,
-                mimetype=image_obj['ContentType']
+                as_attachment=False,  # Set to True if you want to force download
+                download_name=profileImageName,  # For Flask 2.x, use 'download_name'
+                mimetype=s3_object['ContentType']  # Set the content type to the correct MIME type
             )
         except Exception as e:
-            print(f"Error fetching file: {e}")
-            return make_response(jsonify({"error": f"Error fetching profile image: {e}"}), 500)
-
+            print(f"Error fetching image: {e}")
+            return make_response(jsonify({"error": f"Error fetching image: {e}"}), 500)
 api.add_resource(GetProfileImage, "/profile-image//<path:profileImageName>")
 
 #Logout resource
