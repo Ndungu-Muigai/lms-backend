@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, jsonify, session, send_from_directory
+from flask import Flask, make_response, request, jsonify, session, send_from_directory, url_for
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -15,6 +15,8 @@ from Mail.reset import send_otp
 from Generations.password import random_password
 from Generations.otp import get_otp
 import redis
+import boto3
+from botocore.exceptions import NoCredentialsError
 
 app = Flask(__name__)
 
@@ -39,6 +41,14 @@ app.config["UPLOAD_FOLDER"] = './static/Uploads'
 app.config["SENDER_NAME"] = "Leave Management System"
 app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke"
 app.static_folder = 'static'
+
+#AWS S3 configuration
+S3_BUCKET_NAME=os.getenv("S3_BUCKET_NAME")
+S3_REGION=os.getenv("S3_REGION")
+S3_ACCESS_KEY=os.getenv("S3_ACCESS_KEY")
+S3_SECRET_ACCESS_KEY=os.getenv("S3_SECRET_ACCESS_KEY")
+
+s3=boto3.client("s3", region_name=S3_REGION, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_ACCESS_KEY)
 
 # Initializing the migration
 migrate = Migrate(app, db)
@@ -416,12 +426,19 @@ class LeaveApplications(Resource):
             #Generating a unigue ID for each file name (makes the filename unique)
             unique_file_name=str(uuid.uuid1()) + "_" + file_name
 
-           #Saving the application files to the respective folder based on the leave type
-            
-            file_attachment.save(os.path.join(f"{app.config['UPLOAD_FOLDER']}/{leave_type}", unique_file_name))
+            #Saving the file to s3 bucket
+            try:
+                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,file.filename,ExtraArgs={"ACL": "public-read"})
+                print("File uploaded")
+            except:
+                make_response(jsonify({"error": "Error uploading file. Please try again!"}))
 
-            #Saving the unique filename to the database by assigning it to the file attachment variable
-            file_attachment=f"{leave_type}/{unique_file_name}"
+            # #Saving the application files to the respective folder based on the leave type
+            
+            # file_attachment.save(os.path.join(f"{app.config['UPLOAD_FOLDER']}/{leave_type}", unique_file_name))
+
+            # #Saving the unique filename to the database by assigning it to the file attachment variable
+            # file_attachment=f"{leave_type}/{unique_file_name}"
 
         #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
         employee_role=r.get("employee_role").decode("utf-8")
@@ -614,11 +631,18 @@ class PendingEmployeeRequestsByID(Resource):
 
 api.add_resource(PendingEmployeeRequestsByID, "/pending-employee-requests/<int:id>")
 
-#File fetching resource
+# File fetching resource
 class GetFile(Resource):
     def get(self, filename):
-        print("Fetching file")
-        return send_from_directory('static', filename)
+        try:
+            # Fetch the file from the S3 bucket
+            file_obj = s3.get_object(Bucket=S3_BUCKET, Key=filename)
+            # Use BytesIO to create a stream from the S3 file object
+            file_stream = io.BytesIO(file_obj['Body'].read())
+            return send_file(file_stream, as_attachment=True, attachment_filename=filename)
+        except Exception as e:
+            print(f"Error fetching file: {e}")
+            abort(404, description="File not found")
 
 api.add_resource(GetFile, "/static/<path:filename>")
 
