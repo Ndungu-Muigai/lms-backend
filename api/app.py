@@ -478,11 +478,6 @@ class LeaveApplicationByID(Resource):
         #Creating a response dict for that specific application
         leave_application_dict=LeaveApplicationsSchema(only=("id", "leave_type","leave_duration", "start_date","end_date","total_days", "file_attachment","reason","hod_status","gm_status","hr_status")).dump(leave_application)
         
-        # 
-#If a file attachment exists, return the file path
-        # if leave_application.file_attachment:
-        #     file_path=f"Uploads/{leave_application.file_attachment}"
-        #     leave_application_dict["file_attachment"]=file_path
         #Creating a response
         return make_response(leave_application_dict, 200)
 
