@@ -419,26 +419,31 @@ class LeaveApplications(Resource):
 
         #If there is a file attachment, generate a unique file name and save it to the Uploads folder
         if file_attachment:
+            # Getting the secure filename
+            file_name = secure_filename(file_attachment.filename)
 
-            #Getting the file name of the file attachment
-            file_name=secure_filename(file_attachment.filename)
+            # Generating a unique ID for each file name
+            unique_file_name = str(uuid.uuid1()) + "_" + file_name
 
-            #Generating a unigue ID for each file name (makes the filename unique)
-            unique_file_name=str(uuid.uuid1()) + "_" + file_name
-
-            #Saving the file to s3 bucket
+            # Saving the file to S3 bucket
             try:
-                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,file.filename,ExtraArgs={"ACL": "public-read"})
+                # Upload the file to S3 and get the URL
+                s3.upload_fileobj(
+                    file_attachment,
+                    S3_BUCKET_NAME,
+                    unique_file_name,
+                    ExtraArgs={"ACL": "public-read"}
+                )
+                file_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{unique_file_name}"
                 print("File uploaded")
-            except:
-                make_response(jsonify({"error": "Error uploading file. Please try again!"}))
+            except Exception as e:
+                print(f"Error uploading file: {e}")
+                return make_response(jsonify({"error": "Error uploading file. Please try again!"}), 500)
 
-            # #Saving the application files to the respective folder based on the leave type
-            
-            # file_attachment.save(os.path.join(f"{app.config['UPLOAD_FOLDER']}/{leave_type}", unique_file_name))
-
-            # #Saving the unique filename to the database by assigning it to the file attachment variable
-            # file_attachment=f"{leave_type}/{unique_file_name}"
+            # Store the file URL in the database instead of the FileStorage object
+            file_attachment = file_url
+        else:
+            file_attachment = None
 
         #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
         employee_role=r.get("employee_role").decode("utf-8")
