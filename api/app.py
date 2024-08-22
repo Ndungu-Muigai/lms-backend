@@ -564,11 +564,6 @@ class PendingEmployeeRequestsByID(Resource):
         #Querying the database to get the individual request and creating a dict of it
         request=LeaveApplication.query.filter_by(id=id).first()
         response=LeaveApplicationsSchema().dump(request)
-        
-        #If a file attachment exists, return the file path
-        if request and request.file_attachment:
-            file_path = f"Uploads/{request.file_attachment}"  
-            response["file_attachment"] = file_path
 
         return make_response(response, 200)
     
