@@ -425,22 +425,23 @@ class LeaveApplications(Resource):
             # Generating a unique ID for each file name
             unique_file_name = str(uuid.uuid1()) + "_" + file_name
 
+            #Specifying th folder where the files will be uploaded
+            folder_name="uploads"
+
+            # Combine folder name with filename to create the full key
+            file_key = folder_name + unique_file_name
+
             # Saving the file to S3 bucket
             try:
                 # Upload the file to S3 and get the URL
-                s3.upload_fileobj(
-                    file_attachment,
-                    S3_BUCKET_NAME,
-                    unique_file_name
-                )
-                file_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{unique_file_name}"
+                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,file_key)
                 print("File uploaded")
             except Exception as e:
                 print(f"Error uploading file: {e}")
                 return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
 
             # Store the file URL in the database instead of the FileStorage object
-            file_attachment = file_url
+            file_attachment = unique_file_name
         else:
             file_attachment = None
 
