@@ -877,7 +877,7 @@ class GetProfileImage(Resource):
     def get(self, profileImageName):
         try:
             #Fetch the image from the S3 bucket
-            image_obj=s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
+            image_obj=s3.get_fileobj(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
             image_stream=io.BytesIO(image_obj["Body"].read())
             return send_file(image_stream, as_attachment=True, attachment_filename=profileImageName)
         except Exception as e:
