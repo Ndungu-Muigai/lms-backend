@@ -649,7 +649,7 @@ class GetFile(Resource):
             print(f"Error fetching file: {e}")
             abort(404, description="File not found")
 
-api.add_resource(GetFile, "/static/<path:filename>")
+api.add_resource(GetFile, "/get-file/<path:filename>")
 
 #All employees resource
 class Employees(Resource):
