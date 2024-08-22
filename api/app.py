@@ -613,7 +613,7 @@ class GetFile(Resource):
     def get(self, filename):
         try:
             # Fetch the file from the S3 bucket
-            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=filename)
+            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"uploads/{filename}")
             # Use BytesIO to create a stream from the S3 file object
             file_stream = io.BytesIO(file_obj['Body'].read())
             return send_file(file_stream, as_attachment=True, attachment_filename=filename)
