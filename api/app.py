@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, jsonify, session, send_from_directory, url_for
+from flask import Flask, make_response, request, jsonify, session, send_file, url_for
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
