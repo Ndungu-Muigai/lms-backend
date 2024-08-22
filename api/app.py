@@ -17,6 +17,7 @@ from Generations.otp import get_otp
 import redis
 import boto3
 from botocore.exceptions import NoCredentialsError
+import io
 
 app = Flask(__name__)
 
