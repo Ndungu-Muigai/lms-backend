@@ -841,27 +841,27 @@ class Profile(Resource):
         profile_image = request.files.get("profile_image")
 
         print(profile_image)
-        # # Check if the image was provided
-        # if profile_image is None:
-        #     return make_response(jsonify({"error": "No file uploaded"}), 400)
+        # Check if the image was provided
+        if profile_image is None:
+            return make_response(jsonify({"error": "No file uploaded"}), 400)
 
-        # # Getting the file name
-        # profile_image_filename = profile_image.filename
+        # Getting the file name
+        profile_image_filename = profile_image.filename
 
-        # # Generating a unique file name
-        # unique_profile_image_name = str(uuid.uuid1()) + "_" + profile_image_filename
+        # Generating a unique file name
+        unique_profile_image_name = str(uuid.uuid1()) + "_" + profile_image_filename
 
-        # # Path to the folder in S3 bucket
-        # s3_path = f"images/{unique_profile_image_name}"
+        # Path to the folder in S3 bucket
+        s3_path = f"images/{unique_profile_image_name}"
 
-        # # Uploading the file to S3
-        # try:
-        #     s3.upload_obj(profile_image, S3_BUCKET_NAME, s3_path)
-        #     print("Profile image updated")
-        #     return make_response(jsonify({"success": "Profile picture updated successfully!"}), 200)
-        # except Exception as e:
-        #     print(f"Error uploading file: {e}")
-        #     return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
+        # Uploading the file to S3
+        try:
+            s3.upload_obj(profile_image, S3_BUCKET_NAME, s3_path)
+            print("Profile image updated")
+            return make_response(jsonify({"success": "Profile picture updated successfully!"}), 200)
+        except Exception as e:
+            print(f"Error uploading file: {e}")
+            return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
   
 
 api.add_resource(Profile, "/profile")
