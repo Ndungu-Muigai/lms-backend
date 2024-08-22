@@ -437,7 +437,7 @@ class LeaveApplications(Resource):
                 print("File uploaded")
             except Exception as e:
                 print(f"Error uploading file: {e}")
-                return make_response(jsonify({"error": "Error uploading file. Please try again!"}), 500)
+                return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
 
             # Store the file URL in the database instead of the FileStorage object
             file_attachment = file_url
