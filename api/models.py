@@ -19,7 +19,7 @@ class Employee(db.Model):
     position=db.Column(db.String, nullable=False)
     role=db.Column(db.String, nullable=False)
     password=db.Column(db.String, nullable=False)
-    profile_picture=db.Column(db.String, nullable=False)
+    profile_picture=db.Column(db.String, nullable=True)
     first_login=db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     
