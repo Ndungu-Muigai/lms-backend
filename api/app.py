@@ -622,7 +622,7 @@ class GetFile(Resource):
             return send_file(file_stream, as_attachment=True, attachment_filename=filename)
         except Exception as e:
             print(f"Error fetching file: {e}")
-            abort(404, description="File not found")
+            return(make_response(jsonify({"error": "File not found"})),404)
 
 api.add_resource(GetFile, "/get-file/<path:filename>")
 
@@ -888,9 +888,9 @@ class GetProfileImage(Resource):
             )
         except Exception as e:
             print(f"Error fetching file: {e}")
-            return make_response(jsonify({"error": f"Error uploading profile image: {e}"}), 500)
+            return make_response(jsonify({"error": f"Error fetching profile image: {e}"}), 500)
 
-api.add_resource(GetProfileImage, "/profile-image")
+api.add_resource(GetProfileImage, "/profile-image//<path:profileImageName>")
 
 #Logout resource
 class Logout(Resource):
