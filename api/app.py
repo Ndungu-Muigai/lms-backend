@@ -426,7 +426,7 @@ class LeaveApplications(Resource):
             unique_file_name = str(uuid.uuid1()) + "_" + file_name
 
             #Specifying th folder where the files will be uploaded
-            folder_name="uploads"
+            folder_name="uploads/"
 
             # Combine folder name with filename to create the full key
             file_key = folder_name + unique_file_name
