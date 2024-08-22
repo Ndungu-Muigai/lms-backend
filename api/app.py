@@ -34,8 +34,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
-# Configuring the file uploads
-app.config["UPLOAD_FOLDER"] = './static/Uploads'
+# # Configuring the file uploads
+# app.config["UPLOAD_FOLDER"] = './static/Uploads'
 
 # Email sender configuration
 app.config["SENDER_NAME"] = "Leave Management System"
