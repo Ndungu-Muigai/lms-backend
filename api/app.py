@@ -841,9 +841,6 @@ class Profile(Resource):
         profile_image = request.files.get("profile_image")
 
         print(profile_image)
-        # Check if the image was provided
-        if profile_image is None:
-            return make_response(jsonify({"error": "No file uploaded"}), 400)
 
         # Getting the file name
         profile_image_filename = profile_image.filename
