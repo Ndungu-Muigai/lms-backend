@@ -874,15 +874,24 @@ api.add_resource(Profile, "/profile")
 
 class GetProfileImage(Resource):
     def get(self, profileImageName):
+        public_urls=[]
         try:
-            # Fetch the file from the S3 bucket
-            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
-            # Use BytesIO to create a stream from the S3 file object
-            file_stream = io.BytesIO(file_obj['Body'].read())
-            return send_file(file_stream, as_attachment=True, attachment_filename=profileImageName)
+            for item in s3.list_objects(Bucket=S3_BUCKET_NAME)["Contents"]:
+                presigned_url=s3.generate_presigned_url("get_object",Params={"Bucket": S3_BUCKET_NAME, "Key": item[f"images/{profileImageName}"]}, ExpiresIn=100)
+                public_urls.append(presigned_url)
         except Exception as e:
-            print(f"Error fetching file: {e}")
-            return(make_response(jsonify({"error": "File not found"})),404)
+            return make_response(jsonify({"error": f"Error fetching image: {e}"}))
+
+        return public_urls
+        # try:
+        #     # Fetch the file from the S3 bucket
+        #     file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
+        #     # Use BytesIO to create a stream from the S3 file object
+        #     file_stream = io.BytesIO(file_obj['Body'].read())
+        #     return send_file(file_stream, as_attachment=True, attachment_filename=profileImageName)
+        # except Exception as e:
+        #     print(f"Error fetching file: {e}")
+        #     return(make_response(jsonify({"error": "File not found"})),404)
         
 api.add_resource(GetProfileImage, "/profile-image//<path:profileImageName>")
 
