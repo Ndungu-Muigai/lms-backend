@@ -889,7 +889,7 @@ class GetProfileImage(Resource):
             # Use BytesIO to create a stream from the S3 file object
             file_stream = io.BytesIO(file_obj['Body'].read())
             
-            return send_file(file_stream, mimetype=content_type, as_attachment=True, download_name=profileImageName)
+            return send_file(file_stream, mimetype=content_type, as_attachment=True, attachment_filename=profileImageName)
         
         except s3.exceptions.NoSuchKey:
             print(f"Error: The file {profileImageName} does not exist.")
