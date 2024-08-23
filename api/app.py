@@ -872,8 +872,9 @@ api.add_resource(Profile, "/profile")
 class GetProfileImage(Resource):
     def get(self, profileImageName):
         try:
+            s3_key=f"images/{profileImageName}"
             # Check if the file exists in the S3 bucket
-            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"images/{profileImageName}")
+            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=s3_key)
             
             # Check the file content type for proper handling
             content_type = file_obj['ContentType']
