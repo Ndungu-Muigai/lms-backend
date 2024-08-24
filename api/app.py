@@ -869,22 +869,6 @@ class Profile(Resource):
 
 api.add_resource(Profile, "/profile")
 
-class GetProfileImage(Resource):
-    def get(self, profileImageName):
-        try:
-            # Fetch the file from the S3 bucket
-            file_obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=f"uploads/{profileImageName}")
-            # Use BytesIO to create a stream from the S3 file object
-            file_stream = io.BytesIO(file_obj['Body'].read())
-            return send_file(file_stream, as_attachment=True, attachment_filename=profileImageName)
-        except Exception as e:
-            print(f"Error fetching file: {e}")
-            response = jsonify({"error": "File not found"})
-            response.status_code = 404
-            return response
-
-api.add_resource(GetProfileImage, "/profile-image/<path:profileImageName>")
-
 #Logout resource
 class Logout(Resource):
     def post(self):
