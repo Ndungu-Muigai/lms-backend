@@ -837,10 +837,11 @@ class Profile(Resource):
         return make_response(jsonify({"success": "Password updated successfully"}))
 
     def patch(self):
-        # Get the image
+        # Get the new profile image
         profile_image = request.files.get("profile_image")
 
-        print(profile_image)
+        if not profile_image:
+            return make_response(jsonify({"error": "No profile image provided"}), 400)
 
         # Getting the file name
         profile_image_filename = profile_image.filename
@@ -851,20 +852,40 @@ class Profile(Resource):
         # Path to the folder in S3 bucket
         s3_path = f"images/{unique_profile_image_name}"
 
-        employee_id=r.get("employee_id").decode("utf-8")
-        employee=Employee.query.filter_by(id=employee_id).first()
+        # Get the employee ID from the session or request
+        employee_id = r.get("employee_id").decode("utf-8")
+        employee = Employee.query.filter_by(id=employee_id).first()
 
-        # Uploading the file to S3
+        if not employee:
+            return make_response(jsonify({"error": "Employee not found"}), 404)
+
+        # Check if there's an existing profile image
+        if employee.profile_picture:
+            old_s3_path = f"images/{employee.profile_picture}"
+
+            # Delete the old image from S3
+            try:
+                s3.delete_object(Bucket=S3_BUCKET_NAME, Key=old_s3_path)
+                print(f"Old profile image deleted: {old_s3_path}")
+            except Exception as e:
+                print(f"Error deleting old profile image: {e}")
+                return make_response(jsonify({"error": "Error deleting old profile image. Please try again later!"}), 500)
+
+        # Upload the new file to S3
         try:
             s3.upload_fileobj(profile_image, S3_BUCKET_NAME, s3_path)
             print("Profile image updated")
-            employee.profile_picture=unique_profile_image_name
+
+            # Update the profile picture in the database with the new unique file name
+            employee.profile_picture = unique_profile_image_name
             db.session.add(employee)
             db.session.commit()
+
             return make_response(jsonify({"success": "Profile picture updated successfully!"}), 200)
         except Exception as e:
             print(f"Error uploading file: {e}")
             return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
+
   
 
 api.add_resource(Profile, "/profile")
