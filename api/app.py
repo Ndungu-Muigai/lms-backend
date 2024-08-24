@@ -840,9 +840,6 @@ class Profile(Resource):
         # Get the new profile image
         profile_image = request.files.get("profile_image")
 
-        if not profile_image:
-            return make_response(jsonify({"error": "No profile image provided"}), 400)
-
         # Getting the file name
         profile_image_filename = profile_image.filename
 
