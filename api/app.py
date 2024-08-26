@@ -21,41 +21,35 @@ import io
 
 app = Flask(__name__)
 
-# Configuring redis with the AWS ElastiCache endpoint
-r = redis.Redis(
-    host="mobikey-lms-rvdpsl.serverless.use1.cache.amazonaws.com", 
-    port=6379, 
-    ssl=True
-)
-
+# Configuring redis
+r=redis.Redis(host="witty-anemone-44477.upstash.io", port=6379, password=os.getenv("REDIS_PASSWORD"), ssl=True)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 app.config['SESSION_REDIS'] = r
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
+
 # Configuring the database
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
+
+# # Configuring the file uploads
+# app.config["UPLOAD_FOLDER"] = './static/Uploads'
 
 # Email sender configuration
 app.config["SENDER_NAME"] = "Leave Management System"
 app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke"
 app.static_folder = 'static'
 
-# AWS S3 configuration
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
-S3_REGION = os.getenv("S3_REGION")
-S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
-S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
+#AWS S3 configuration
+S3_BUCKET_NAME=os.getenv("S3_BUCKET_NAME")
+S3_REGION=os.getenv("S3_REGION")
+S3_ACCESS_KEY=os.getenv("S3_ACCESS_KEY")
+S3_SECRET_ACCESS_KEY=os.getenv("S3_SECRET_ACCESS_KEY")
 
-s3 = boto3.client(
-    "s3", 
-    region_name=S3_REGION, 
-    aws_access_key_id=S3_ACCESS_KEY, 
-    aws_secret_access_key=S3_SECRET_ACCESS_KEY
-)
+s3=boto3.client("s3", region_name=S3_REGION, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_ACCESS_KEY)
 
 # Initializing the migration
 migrate = Migrate(app, db)
@@ -64,42 +58,41 @@ db.init_app(app)
 CORS(app)
 
 Session(app)
-
 # Wrapping the app as an API instance
 api = Api(app)
 
-# Index resource
+#Index resource
 class Index(Resource):
     def get(self):
         return make_response(jsonify({"message": "Welcome to the Mobikey LMS backend"}))
-
+    
 api.add_resource(Index, "/")
 
-# Login resource
+#Login resource
 class Login(Resource):
     def post(self):
-        # Getting the information from the form
-        username = request.json["username"].lower()  # Converting username to lower case
-        password = request.json["password"]
+        #Getting the infprmation from the form
+        username=request.json["username"].lower() #Converting username to lower case in case user enters the username in all caps
+        password=request.json["password"]
 
-        # Querying the database to check if the employee exists based on the username
-        employee = Employee.query.filter_by(username=username).first()
+        #Querying the database to check if the employee exists based on the username
+        employee=Employee.query.filter_by(username=username).first()
 
-        # If the username doesn't exist, return an error
+        #If the username doesn't exists, return an error
         if not employee:
             return make_response(jsonify({"error": "Incorrect username!"}), 409)
         
-        # If the password is incorrect, return an error
-        elif employee.password != hashlib.md5(password.encode("utf-8")).hexdigest():
+        #If the password is incorrect, return an error
+        elif employee.password!= hashlib.md5(password.encode("utf-8")).hexdigest():
             return make_response(jsonify({"error": "Incorrect password!"}), 409)
         
-        # Creating sessions that will be used later on in the program 
-        session['employee_id'] = employee.id
-        session['employee_role'] = employee.role
-        session['employee_department'] = employee.department
-        session['employee_country'] = employee.country
+        #Creating sessions that will be used later on in the program 
+        r.set("employee_id",employee.id)
+        r.set("employee_role",employee.role)
+        r.set("employee_department",employee.department)
+        r.set("employee_country",employee.country)
 
-        # Returning a success message once a user is successfully authenticated
+        #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
             {
                 "success": "Login successful!",
@@ -108,13 +101,12 @@ class Login(Resource):
 
 api.add_resource(Login, "/login")
 
-
 #Resource to update password
 class UpdatePassword(Resource):
     def post(self):
 
         #Getting the ID of the employee
-        employee_id=session.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the form data
         password=request.json["new_password"]
@@ -240,7 +232,7 @@ class Dashboard(Resource):
     def get(self):
 
         #Getting the ID of the current logged in user
-        employee_id= session.get("employee_id")
+        employee_id= r.get("employee_id").decode("utf-8")
 
         #If a user is logged in, fetch his/her data
         #Counting the leave applications and returning the response to the front end
@@ -288,9 +280,9 @@ class Dashboard(Resource):
         pending_requests_count = 0
         
         #Getting the pending leave requests count
-        role=session.get("employee_role")
-        department=session.get("employee_department")
-        country=session.get("employee_country")
+        role=r.get("employee_role").decode("utf-8")
+        department=r.get("employee_department").decode("utf-8")
+        country=r.get("employee_country").decode("utf-8")
 
         #Getting the requests based on the user's role
         if role == "HOD":
@@ -324,7 +316,7 @@ class Dashboard(Resource):
             {
                 "success": "Logged in successfully",
                 "full_name": employee.full_name(),
-                "role": session.get("employee_role"),
+                "role": r.get("employee_role").decode("utf-8"),
                 "leave_days":
                 {
                     "total_requests": total_requests,
@@ -344,7 +336,7 @@ class LeaveApplications(Resource):
     def get(self):
 
         #Get the currently logged in user
-        employee_id=session.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Get the user's leave applications and create a dict of it
         leave_applications=LeaveApplication.query.filter_by(employee_id=employee_id).all()
@@ -369,7 +361,7 @@ class LeaveApplications(Resource):
     def post(self):
 
         # Get the employee ID from the session
-        employee_id = session.get("employee_id")
+        employee_id = r.get("employee_id").decode("utf-8")
 
         # Getting the values from the form
         leave_type = request.form.get("leave_type")
@@ -455,7 +447,7 @@ class LeaveApplications(Resource):
             file_attachment = None
 
         #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
-        employee_role=session.get("employee_role")
+        employee_role=r.get("employee_role").decode("utf-8")
         if employee_role == "HOD":
             new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
 
@@ -514,10 +506,10 @@ api.add_resource(ApprovedRequests, "/approved-requests")
 class PendingEmployeeRequests(Resource):
     def get(self):
         #Getting the session data which will be used to query the leave applications table
-        employee_id=session.get("employee_id")
-        role=session.get("employee_role")
-        department=session.get("employee_department")
-        country=session.get("employee_country")
+        employee_id=r.get("employee_id").decode("utf-8")
+        role=r.get("employee_role").decode("utf-8")
+        department=r.get("employee_department").decode("utf-8")
+        country=r.get("employee_country").decode("utf-8")
 
         #Displaying the requests based on the user's role
         if role == "HOD":
@@ -565,7 +557,7 @@ class PendingEmployeeRequestsByID(Resource):
         #Getting the approval status (Approved or Rejected) from the frontend
         status=request.json["status"]
         #Getting the role of the currently logged in employee
-        role=session.get("employee_role")
+        role=r.get("employee_role").decode("utf-8")
         
         #Getting the request from the database
         application=LeaveApplication.query.filter_by(id=id).first()
@@ -638,13 +630,13 @@ api.add_resource(GetFile, "/get-file/<path:filename>")
 class Employees(Resource):
     def get(self):
         #Getting the employee id
-        employee_id=session.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the employee country
-        employee_country=session.get("employee_country")
+        employee_country=r.get("employee_country").decode("utf-8")
 
         #Getting the role of the currently logged in user
-        employee_role=session.get("employee_role")
+        employee_role=r.get("employee_role").decode("utf-8")
         
         #If the role is not HR, return an error
         if employee_role != "HR":
@@ -800,7 +792,7 @@ api.add_resource(EmployeeByID, "/employees-data/<int:id>")
 class Profile(Resource):
     def get(self):
         #Getting the ID of the current logged in user
-        employee_id=session.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #If no one is logged in, return an error
         if not employee_id:
@@ -820,7 +812,7 @@ class Profile(Resource):
         confirm_password=request.json["confirm_password"]
 
         #Getting the current logged in employee
-        employee=Employee.query.filter(Employee.id==session.get("employee_id")).first()
+        employee=Employee.query.filter(Employee.id==r.get("employee_id").decode("utf-8")).first()
 
         #Hashing the password 
         hashed_password=hashlib.md5(new_password.encode()).hexdigest()
@@ -858,7 +850,7 @@ class Profile(Resource):
         s3_path = f"images/{unique_profile_image_name}"
 
         # Get the employee ID from the session or request
-        employee_id = session.get("employee_id")
+        employee_id = r.get("employee_id").decode("utf-8")
         employee = Employee.query.filter_by(id=employee_id).first()
 
         if not employee:
