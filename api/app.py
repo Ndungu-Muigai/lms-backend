@@ -316,6 +316,7 @@ class Dashboard(Resource):
             {
                 "success": "Logged in successfully",
                 "full_name": employee.full_name(),
+                "username": employee.username,
                 "role": r.get("employee_role").decode("utf-8"),
                 "leave_days":
                 {
