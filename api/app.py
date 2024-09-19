@@ -22,16 +22,18 @@ import io
 app = Flask(__name__)
 
 # Configuring Redis for session management
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "your_secret_key")
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_USE_SIGNER"] = True
 app.config["SESSION_KEY_PREFIX"] = "session:"
+
+# Update the Redis connection settings based on your environment
 app.config["SESSION_REDIS"] = redis.StrictRedis(
     host=os.getenv("REDIS_HOST", "localhost"),
-    port=os.getenv("REDIS_PORT", 6379),
-    password=os.getenv("REDIS_PASSWORD"),
-    ssl=True
+    port=int(os.getenv("REDIS_PORT", 6379)),
+    password=os.getenv("REDIS_PASSWORD", None),
+    ssl=bool(os.getenv("REDIS_SSL", False))
 )
 
 # Configuring the database
