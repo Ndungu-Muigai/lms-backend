@@ -2,7 +2,7 @@ from flask import Flask, make_response, request, jsonify, session, send_file, ur
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
-from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword   
+from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword, SessionSaver   
 from flask_restful import Api, Resource
 from schema import EmployeeSchema, LeaveDaysSchema, LeaveApplicationsSchema
 import hashlib
@@ -102,7 +102,21 @@ class Login(Resource):
         # r.set("employee_department",employee.department)
         # r.set("employee_country",employee.country)
 
-        print(session["employee_id"])
+        # Save session data in SessionSaver model
+        existing_session = SessionSaver.query.filter_by(employee_id=employee.id).first()
+
+        if existing_session:
+            # Update existing session if it exists
+            existing_session.role = employee.role
+            existing_session.department = employee.department
+            existing_session.country = employee.country
+        else:
+            # Create a new session if it doesn't exist
+            new_session = SessionSaver(employee_id=employee.id,role=employee.role,department=employee.department,country=employee.country)
+            db.session.add(new_session)
+
+        # Commit the changes to the database
+        db.session.commit()
 
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
@@ -116,12 +130,15 @@ api.add_resource(Login, "/login")
 #Resource to update password
 class UpdatePassword(Resource):
     def post(self):
+        # Retrieve session from SessionSaver
+        session_data = SessionSaver.query.filter_by(employee_id=session["employee_id"]).first()
 
-        #Getting the ID of the employee
-        # employee_id=r.get("employee_id").decode("utf-8")
-        employee_id=session.get("employee_id")
+        if not session_data:
+            return make_response(jsonify({"error": "Session not found!"}), 400)
 
-        print(session["employee_id"])
+        # Now use the session data as needed
+        employee_id = session_data.employee_id 
+        
         # Ensure employee_id is present
         if not employee_id:
             return make_response(jsonify({"error": "Employee ID not found in session"}), 400)
