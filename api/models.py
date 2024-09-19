@@ -70,11 +70,3 @@ class OneTimePassword(db.Model):
     email=db.Column(db.String, nullable=False)
     otp=db.Column(db.String, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.now)
-
-# Create a model for storing session data
-class SessionSaver(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    employee_id = db.Column(db.Integer, unique=True, nullable=False)
-    role = db.Column(db.String)
-    department=db.Column(db.String)
-    country=db.Column(db.String)

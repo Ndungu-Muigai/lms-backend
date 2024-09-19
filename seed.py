@@ -10,12 +10,20 @@ if __name__ == "__main__":
         # OneTimePassword.query.delete()
         # db.session.commit()
 
-        new_employee=Employee(first_name="Samuel",last_name="Muigai", gender="Male", email="muigaisam65@gmail.com", username="smuigai", country="KE", phone="+254707251073", department="Logistics", position="Logistics Assistant", role="HR", password="214aaf2c9a8510d948555ee25cb38397")
-        db.session.add(new_employee)
+        samuel_muigai=Employee(first_name="Samuel",last_name="Muigai", gender="Male", email="muigaisam65@gmail.com", username="smuigai", country="KE", phone="+254707251073", department="Logistics", position="Logistics Assistant", role="HR", password="214aaf2c9a8510d948555ee25cb38397")
+        db.session.add(samuel_muigai)
         db.session.commit()
 
-        new_leave_days=LeaveDays(employee_id=new_employee.id, normal_leave=21, sick_leave=14, maternity_leave=0, paternity_leave=14)
-        db.session.add(new_leave_days)
+        muigai_leave_days=LeaveDays(employee_id=samuel_muigai.id, normal_leave=21, sick_leave=14, maternity_leave=0, paternity_leave=14)
+        db.session.add(muigai_leave_days)
         db.session.commit()
 
-        print("Information seeded successfully")
+        lourdes_wairimu=Employee(first_name="Lourdes", last_name="Wairimu", gender="Female", email="lourdeswairimu@gmail.com", username="lwairimu", country="KE", phone="+254745416760", department="Administration", position="HR Manager", role="HR", password="7ffdd51bc0133c88d240889d7d6a5214", first_login=False)
+        db.session.add(lourdes_wairimu)
+        db.session.commit()
+
+        wairimu_leave_days=LeaveDays(employee_id=lourdes_wairimu.id, normal_leave=21, sick_leave=14, maternity_leave=90, paternity_leave=0)
+        db.session.add(wairimu_leave_days)
+        db.session.commit()
+
+        print("Information added successfully")
