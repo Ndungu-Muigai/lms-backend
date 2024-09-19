@@ -925,7 +925,7 @@ class Logout(Resource):
     def post(self):
         #Clear all sessions
         session.clear()
-        r.delete("employee_id","employee_department","employee_role","employee_country")
+        # r.delete("employee_id","employee_department","employee_role","employee_country")
         #Return a response
         return make_response(jsonify({"success": "Logged out successfully"}), 200)
     
