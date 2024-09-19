@@ -70,9 +70,9 @@ class OneTimePassword(db.Model):
     email=db.Column(db.String, nullable=False)
     otp=db.Column(db.String, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.now)
-    
+
 # Create a model for storing session data
-class SessionData(db.Model):
+class Sessions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(255), unique=True, nullable=False)
     data = db.Column(db.LargeBinary)
