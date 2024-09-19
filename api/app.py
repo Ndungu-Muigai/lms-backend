@@ -1,60 +1,47 @@
-from flask import Flask, make_response, request, jsonify, session, send_file, url_for
+from flask import Flask, make_response, request, jsonify, session
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
-from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword, SessionSaver   
+from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword, SessionSaver
 from flask_restful import Api, Resource
-from schema import EmployeeSchema, LeaveDaysSchema, LeaveApplicationsSchema
 import hashlib
-from datetime import datetime, date, timedelta
-from werkzeug.utils import secure_filename
-import uuid
+from datetime import timedelta
 import os
-from Mail.credentials import send_login_credentials
-from Mail.reset import send_otp
-from Generations.password import random_password
-from Generations.otp import get_otp
 import redis
 import boto3
-from botocore.exceptions import NoCredentialsError
-import io
 
 app = Flask(__name__)
 
-# Configuring redis
-# r=redis.Redis(host="witty-anemone-44477.upstash.io", port=6379, password=os.getenv("REDIS_PASSWORD"), ssl=True)
-# app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
-# app.config["SESSION_TYPE"] = "redis"
-# app.config['SESSION_REDIS'] = r
-# app.config['SESSION_PERMANENT'] = False
-# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
-
-#Configuring session management
-app.config["SESSION_TYPE"]="sqlalchemy"
-app.config["SESSION_SQLALCHEMY"]=db
-app.config["SESSION_PERMANENT"]=False
-
+# Configuring Redis for session management
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_KEY_PREFIX"] = "session:"
+app.config["SESSION_REDIS"] = redis.StrictRedis(
+    host=os.getenv("REDIS_HOST", "localhost"),
+    port=os.getenv("REDIS_PORT", 6379),
+    password=os.getenv("REDIS_PASSWORD"),
+    ssl=True
+)
 
 # Configuring the database
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
 
-# # Configuring the file uploads
-# app.config["UPLOAD_FOLDER"] = './static/Uploads'
-
 # Email sender configuration
 app.config["SENDER_NAME"] = "Leave Management System"
 app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke"
 app.static_folder = 'static'
 
-#AWS S3 configuration
-S3_BUCKET_NAME=os.getenv("S3_BUCKET_NAME")
-S3_REGION=os.getenv("S3_REGION")
-S3_ACCESS_KEY=os.getenv("S3_ACCESS_KEY")
-S3_SECRET_ACCESS_KEY=os.getenv("S3_SECRET_ACCESS_KEY")
+# AWS S3 configuration
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+S3_REGION = os.getenv("S3_REGION")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
+S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
 
-s3=boto3.client("s3", region_name=S3_REGION, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_ACCESS_KEY)
+s3 = boto3.client("s3", region_name=S3_REGION, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_ACCESS_KEY)
 
 # Initializing the migration
 migrate = Migrate(app, db)
@@ -63,67 +50,56 @@ db.init_app(app)
 CORS(app)
 
 Session(app)
-# Wrapping the app as an API instance
 api = Api(app)
 
-#Index resource
+# Index resource
 class Index(Resource):
     def get(self):
         return make_response(jsonify({"message": "Welcome to the Mobikey LMS backend"}))
     
 api.add_resource(Index, "/")
 
-#Login resource
+# Login resource
 class Login(Resource):
     def post(self):
-        #Getting the infprmation from the form
-        username=request.json["username"].lower() #Converting username to lower case in case user enters the username in all caps
-        password=request.json["password"]
+        username = request.json.get("username", "").lower()
+        password = request.json.get("password", "")
 
-        #Querying the database to check if the employee exists based on the username
-        employee=Employee.query.filter_by(username=username).first()
+        employee = Employee.query.filter_by(username=username).first()
 
-        #If the username doesn't exists, return an error
         if not employee:
             return make_response(jsonify({"error": "Incorrect username!"}), 409)
-        
-        #If the password is incorrect, return an error
-        elif employee.password!= hashlib.md5(password.encode("utf-8")).hexdigest():
+
+        elif employee.password != hashlib.md5(password.encode("utf-8")).hexdigest():
             return make_response(jsonify({"error": "Incorrect password!"}), 409)
 
-        session["employee_id"]=employee.id
-        session["employee_role"]=employee.role
-        session["employee_department"]=employee.department
-        session["employee_country"]=employee.country
-        
-        #Creating sessions that will be used later on in the program 
-        # r.set("employee_id",employee.id)
-        # r.set("employee_role",employee.role)
-        # r.set("employee_department",employee.department)
-        # r.set("employee_country",employee.country)
+        session["employee_id"] = employee.id
+        session["employee_role"] = employee.role
+        session["employee_department"] = employee.department
+        session["employee_country"] = employee.country
 
         # Save session data in SessionSaver model
         existing_session = SessionSaver.query.filter_by(employee_id=employee.id).first()
 
         if existing_session:
-            # Update existing session if it exists
             existing_session.role = employee.role
             existing_session.department = employee.department
             existing_session.country = employee.country
         else:
-            # Create a new session if it doesn't exist
-            new_session = SessionSaver(employee_id=employee.id,role=employee.role,department=employee.department,country=employee.country)
+            new_session = SessionSaver(
+                employee_id=employee.id,
+                role=employee.role,
+                department=employee.department,
+                country=employee.country
+            )
             db.session.add(new_session)
 
-        # Commit the changes to the database
         db.session.commit()
 
-        #Returning a success message once a user is successfully authenticated
-        return make_response(jsonify(
-            {
-                "success": "Login successful!",
-                "first_login": employee.first_login
-            }))
+        return make_response(jsonify({
+            "success": "Login successful!",
+            "first_login": employee.first_login
+        }))
 
 api.add_resource(Login, "/login")
 
@@ -138,7 +114,7 @@ class UpdatePassword(Resource):
 
         # Now use the session data as needed
         employee_id = session_data.employee_id 
-        
+
         # Ensure employee_id is present
         if not employee_id:
             return make_response(jsonify({"error": "Employee ID not found in session"}), 400)
