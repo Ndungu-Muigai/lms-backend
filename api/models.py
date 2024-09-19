@@ -75,6 +75,6 @@ class OneTimePassword(db.Model):
 class SessionSaver(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     employee_id = db.Column(db.Integer, unique=True, nullable=False)
-    role = db.Column(db.LargeBinary)
+    role = db.Column(db.String)
     department=db.Column(db.String)
     country=db.Column(db.String)
