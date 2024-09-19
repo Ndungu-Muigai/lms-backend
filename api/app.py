@@ -1,14 +1,23 @@
-from flask import Flask, make_response, request, jsonify, session
+from flask import Flask, make_response, request, jsonify, session, send_file, url_for
 from flask_session import Session
 from flask_migrate import Migrate
 from flask_cors import CORS
-from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword, SessionSaver
+from api.models import db, Employee, LeaveDays, LeaveApplication, OneTimePassword, SessionSaver   
 from flask_restful import Api, Resource
+from schema import EmployeeSchema, LeaveDaysSchema, LeaveApplicationsSchema
 import hashlib
-from datetime import timedelta
+from datetime import datetime, date, timedelta
+from werkzeug.utils import secure_filename
+import uuid
 import os
+from Mail.credentials import send_login_credentials
+from Mail.reset import send_otp
+from Generations.password import random_password
+from Generations.otp import get_otp
 import redis
 import boto3
+from botocore.exceptions import NoCredentialsError
+import io
 
 app = Flask(__name__)
 
@@ -114,7 +123,7 @@ class UpdatePassword(Resource):
 
         # Now use the session data as needed
         employee_id = session_data.employee_id 
-
+        
         # Ensure employee_id is present
         if not employee_id:
             return make_response(jsonify({"error": "Employee ID not found in session"}), 400)
