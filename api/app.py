@@ -102,6 +102,8 @@ class Login(Resource):
         # r.set("employee_department",employee.department)
         # r.set("employee_country",employee.country)
 
+        print(session["employee_id"])
+
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
             {
@@ -118,6 +120,11 @@ class UpdatePassword(Resource):
         #Getting the ID of the employee
         # employee_id=r.get("employee_id").decode("utf-8")
         employee_id=session.get("employee_id")
+
+        print(session["employee_id"])
+        # Ensure employee_id is present
+        if not employee_id:
+            return make_response(jsonify({"error": "Employee ID not found in session"}), 400)
 
         #Getting the form data
         password=request.json["new_password"]
