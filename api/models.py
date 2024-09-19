@@ -72,7 +72,7 @@ class OneTimePassword(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.now)
 
 # Create a model for storing session data
-class Sessions(db.Model):
+class SessionSaver(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(255), unique=True, nullable=False)
     data = db.Column(db.LargeBinary)
