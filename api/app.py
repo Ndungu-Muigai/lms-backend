@@ -238,6 +238,9 @@ class Dashboard(Resource):
         #Getting the ID of the current logged in user
         employee_id= r.get("employee_id")
 
+        session_key = f"user:{employee.id}"
+        employee_id = r.get(f"{session_key}:employee_id")
+
         if employee_id is None:
             return make_response(jsonify({"error": "Session expired or user not logged in"}), 401)
 
@@ -348,7 +351,8 @@ class LeaveApplications(Resource):
 
         #Get the currently logged in user
         employee_id= r.get("employee_id")
-        # employee_id=r.get("employee_id")
+        session_key = f"user:{employee.id}"
+        employee_id = r.get(f"{session_key}:employee_id")
 
         #Get the user's leave applications and create a dict of it
         leave_applications=LeaveApplication.query.filter_by(employee_id=employee_id).all()
