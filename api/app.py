@@ -238,7 +238,7 @@ class Dashboard(Resource):
         #Getting the ID of the current logged in user
         employee_id= r.get("employee_id")
 
-        session_key = f"user:{employee.id}"
+        session_key = f"user:{employee_id}"
         employee_id = r.get(f"{session_key}:employee_id")
 
         if employee_id is None:
