@@ -236,7 +236,7 @@ class Dashboard(Resource):
     def get(self):
 
         #Getting the ID of the current logged in user
-        employee_id= r.get("employee_id")
+        
 
         session_key = f"user:{employee_id}"
         employee_id = r.get(f"{session_key}:employee_id")
@@ -350,7 +350,7 @@ class LeaveApplications(Resource):
     def get(self):
 
         #Get the currently logged in user
-        employee_id= r.get("employee_id")
+        
         session_key = f"user:{employee.id}"
         employee_id = r.get(f"{session_key}:employee_id")
 
