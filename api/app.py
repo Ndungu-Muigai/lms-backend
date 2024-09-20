@@ -896,9 +896,10 @@ api.add_resource(Profile, "/profile")
 #Logout resource
 class Logout(Resource):
     def post(self):
+        employee_id = r.get(f"user:{employee_id}:id").decode("utf-8")
         #Clear all sessions
         session.clear()
-        r.delete("employee_id","employee_department","employee_role","employee_country")
+        r.delete(f"user:{employee_id}:id",f"user:{employee_id}:role",f"user:{employee_id}:department",f"user:{employee_id}:country")
         #Return a response
         return make_response(jsonify({"success": "Logged out successfully"}), 200)
     
