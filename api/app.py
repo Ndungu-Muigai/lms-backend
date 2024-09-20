@@ -237,7 +237,7 @@ class Dashboard(Resource):
     def get(self):
 
         #Getting the ID of the current logged in user
-        employee_id= r.get(f"user:{employee_id}:id").decode("utf-8")
+        employee_id= r.get("employee_id").decode("utf-8")
 
         #If a user is logged in, fetch his/her data
         #Counting the leave applications and returning the response to the front end
