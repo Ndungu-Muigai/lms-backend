@@ -22,7 +22,7 @@ import io
 app = Flask(__name__)
 
 # Configuring redis
-r=redis.Redis(host="mobikey-lms-rvdpsl.serverless.use1.cache.amazonaws.com", port=6379, ssl=True, socket_timeout=10)
+r=redis.Redis(host="witty-anemone-44477.upstash.io", port=6379, password=os.getenv("REDIS_PASSWORD"), ssl=True)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 app.config['SESSION_REDIS'] = r
