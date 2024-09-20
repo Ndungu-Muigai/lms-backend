@@ -87,10 +87,15 @@ class Login(Resource):
             return make_response(jsonify({"error": "Incorrect password!"}), 409)
         
         #Creating sessions that will be used later on in the program 
-        r.set("employee_id",employee.id)
-        r.set("employee_role",employee.role)
-        r.set("employee_department",employee.department)
-        r.set("employee_country",employee.country)
+        # r.set("employee_id",employee.id)
+        # r.set("employee_role",employee.role)
+        # r.set("employee_department",employee.department)
+        # r.set("employee_country",employee.country)
+
+        r.set(f"user:{employee.id}:id", employee.id)
+        r.set(f"user:{employee.id}:role", employee.role)
+        r.set(f"user:{employee.id}:department", employee.department)
+        r.set(f"user:{employee.id}:country", employee.country)
 
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
@@ -280,9 +285,9 @@ class Dashboard(Resource):
         pending_requests_count = 0
         
         #Getting the pending leave requests count
-        role=r.get("employee_role").decode("utf-8")
-        department=r.get("employee_department").decode("utf-8")
-        country=r.get("employee_country").decode("utf-8")
+        role = r.get(f"user:{employee_id}:role").decode("utf-8")
+        department = r.get(f"user:{employee_id}:department").decode("utf-8")
+        country = r.get(f"user:{employee_id}:country").decode("utf-8")
 
         #Getting the requests based on the user's role
         if role == "HOD":
@@ -317,7 +322,7 @@ class Dashboard(Resource):
                 "success": "Logged in successfully",
                 "full_name": employee.full_name(),
                 "username": employee.username,
-                "role": r.get("employee_role").decode("utf-8"),
+                "role": r.get(f"user:{employee_id}:role").decode("utf-8"),
                 "leave_days":
                 {
                     "total_requests": total_requests,
@@ -448,7 +453,7 @@ class LeaveApplications(Resource):
             file_attachment = None
 
         #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
-        employee_role=r.get("employee_role").decode("utf-8")
+        employee_role = r.get(f"user:{employee_id}:role").decode("utf-8")
         if employee_role == "HOD":
             new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
 
@@ -508,9 +513,9 @@ class PendingEmployeeRequests(Resource):
     def get(self):
         #Getting the session data which will be used to query the leave applications table
         employee_id=r.get("employee_id").decode("utf-8")
-        role=r.get("employee_role").decode("utf-8")
-        department=r.get("employee_department").decode("utf-8")
-        country=r.get("employee_country").decode("utf-8")
+        role = r.get(f"user:{employee_id}:role").decode("utf-8")
+        department=r.get(f"user:{employee_id}:department").decode("utf-8")
+        country=r.get(f"user:{employee_id}:country").decode("utf-8")
 
         #Displaying the requests based on the user's role
         if role == "HOD":
@@ -558,7 +563,7 @@ class PendingEmployeeRequestsByID(Resource):
         #Getting the approval status (Approved or Rejected) from the frontend
         status=request.json["status"]
         #Getting the role of the currently logged in employee
-        role=r.get("employee_role").decode("utf-8")
+        role = r.get(f"user:{employee_id}:role").decode("utf-8")
         
         #Getting the request from the database
         application=LeaveApplication.query.filter_by(id=id).first()
@@ -634,10 +639,10 @@ class Employees(Resource):
         employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the employee country
-        employee_country=r.get("employee_country").decode("utf-8")
+        employee_country=r.get(f"user:{employee_id}:country").decode("utf-8")
 
         #Getting the role of the currently logged in user
-        employee_role=r.get("employee_role").decode("utf-8")
+        employee_role = r.get(f"user:{employee_id}:role").decode("utf-8")
         
         #If the role is not HR, return an error
         if employee_role != "HR":
