@@ -18,7 +18,7 @@ if __name__ == "__main__":
         db.session.add(muigai_leave_days)
         db.session.commit()
 
-        lourdes_wairimu=Employee(first_name="Lourdes", last_name="Wairimu", gender="Female", email="lourdeswairimu@gmail.com", username="lwairimu", country="KE", phone="+254745416760", department="Administration", position="HR Manager", role="HR", password="7ffdd51bc0133c88d240889d7d6a5214", first_login=False)
+        lourdes_wairimu=Employee(first_name="Lourdes", last_name="Wairimu", gender="Female", email="lourdeswairimu@gmail.com", username="lwairimu", country="KE", phone="+254745416760", department="Administration", position="HR Manager", role="HR", password="7ffdd51bc0133c88d240889d7d6a5214")
         db.session.add(lourdes_wairimu)
         db.session.commit()
 
