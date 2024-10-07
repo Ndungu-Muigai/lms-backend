@@ -23,8 +23,7 @@ from api.Update import update_leave_days
 app = Flask(__name__)
 
 # Configuring redis
-redis_url = "redis://default:PVpzAYPpIficWlkZeiAiMRRoYFVsyWMN@autorack.proxy.rlwy.net:47050"
-r = redis.Redis.from_url(redis_url)
+r=redis.Redis(host="witty-anemone-44477.upstash.io", port=6379, password=os.getenv("REDIS_PASSWORD"), ssl=True)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 app.config['SESSION_REDIS'] = r
@@ -108,7 +107,7 @@ class UpdatePassword(Resource):
     def post(self):
 
         #Getting the ID of the employee
-        employee_id=r.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the form data
         password=request.json["new_password"]
@@ -242,7 +241,7 @@ class Dashboard(Resource):
     def get(self):
 
         #Getting the ID of the current logged in user
-        employee_id=r.get("employee_id")
+        employee_id= r.get("employee_id").decode("utf-8")
 
         #If a user is logged in, fetch his/her data
         #Counting the leave applications and returning the response to the front end
@@ -290,9 +289,9 @@ class Dashboard(Resource):
         pending_requests_count = 0
         
         #Getting the pending leave requests count
-        role=r.get("employee_role")
-        department=r.get("employee_department")
-        country=r.get("employee_country")
+        role=r.get("employee_role").decode("utf-8")
+        department=r.get("employee_department").decode("utf-8")
+        country=r.get("employee_country").decode("utf-8")
 
         #Getting the requests based on the user's role
         if role == "HOD":
@@ -327,7 +326,7 @@ class Dashboard(Resource):
                 "success": "Logged in successfully",
                 "full_name": employee.full_name(),
                 "username": employee.username,
-                "role": r.get("employee_role"),
+                "role": r.get("employee_role").decode("utf-8"),
                 "leave_days":
                 {
                     "total_requests": total_requests,
@@ -347,7 +346,7 @@ class LeaveApplications(Resource):
     def get(self):
 
         #Get the currently logged in user
-        employee_id=r.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Get the user's leave applications and create a dict of it
         leave_applications=LeaveApplication.query.filter_by(employee_id=employee_id).all()
@@ -458,7 +457,7 @@ class LeaveApplications(Resource):
             file_attachment = None
 
         #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
-        employee_role=r.get("employee_role")
+        employee_role=r.get("employee_role").decode("utf-8")
         if employee_role == "HOD":
             new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
 
@@ -517,10 +516,10 @@ api.add_resource(ApprovedRequests, "/approved-requests")
 class PendingEmployeeRequests(Resource):
     def get(self):
         #Getting the session data which will be used to query the leave applications table
-        employee_id=r.get("employee_id")
-        role=r.get("employee_role")
-        department=r.get("employee_department")
-        country=r.get("employee_country")
+        employee_id=r.get("employee_id").decode("utf-8")
+        role=r.get("employee_role").decode("utf-8")
+        department=r.get("employee_department").decode("utf-8")
+        country=r.get("employee_country").decode("utf-8")
 
         #Displaying the requests based on the user's role
         if role == "HOD":
@@ -568,7 +567,7 @@ class PendingEmployeeRequestsByID(Resource):
         #Getting the approval status (Approved or Rejected) from the frontend
         status=request.json["status"]
         #Getting the role of the currently logged in employee
-        role=r.get("employee_role")
+        role=r.get("employee_role").decode("utf-8")
         
         #Getting the request from the database
         application=LeaveApplication.query.filter_by(id=id).first()
@@ -641,13 +640,13 @@ api.add_resource(GetFile, "/get-file/<path:filename>")
 class Employees(Resource):
     def get(self):
         #Getting the employee id
-        employee_id=r.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #Getting the employee country
-        employee_country=r.get("employee_country")
+        employee_country=r.get("employee_country").decode("utf-8")
 
         #Getting the role of the currently logged in user
-        employee_role=r.get("employee_role")
+        employee_role=r.get("employee_role").decode("utf-8")
         
         #If the role is not HR, return an error
         if employee_role != "HR":
@@ -803,7 +802,7 @@ api.add_resource(EmployeeByID, "/employees-data/<int:id>")
 class Profile(Resource):
     def get(self):
         #Getting the ID of the current logged in user
-        employee_id=r.get("employee_id")
+        employee_id=r.get("employee_id").decode("utf-8")
 
         #If no one is logged in, return an error
         if not employee_id:
