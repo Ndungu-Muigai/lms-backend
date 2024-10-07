@@ -26,6 +26,3 @@ def update_leave_days():
 
     #Committing the changes
     db.session.commit()
-
-with app.app_context():
-    update_leave_days()

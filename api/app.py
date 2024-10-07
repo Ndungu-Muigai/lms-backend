@@ -18,6 +18,7 @@ import redis
 import boto3
 from botocore.exceptions import NoCredentialsError
 import io
+from .api import update_leave_days
 
 app = Flask(__name__)
 
@@ -227,6 +228,12 @@ class UpdatePasswordOTP(Resource):
 
 api.add_resource(UpdatePasswordOTP, "/update-password-with-otp")
 
+#Resource to update the leave days
+class UpdateLeaveDays(Resource):
+    def get(self):
+        update_leave_days()
+
+api.add_resource(UpdateLeaveDays, "update-leave-days")
 #Dashboard resource
 class Dashboard(Resource):
     def get(self):
