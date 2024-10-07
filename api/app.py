@@ -199,7 +199,6 @@ class ValidateOTP(Resource):
             return make_response(jsonify({"error": "OTP has already expired"}), 409)
         
         r.set("otp_email", existing_otp.email)
-        db.session.delete(existing_otp)
         return make_response(jsonify({"success": "OTP validated successfully!"}), 200)
     
 api.add_resource(ValidateOTP, "/validate-otp")
@@ -239,6 +238,7 @@ class UpdatePasswordOTP(Resource):
             db.session.commit()
 
             #Delete the OTP email session
+            db.session.delete(otp_record)
             r.delete("otp_email")
 
             #Returning a success message
