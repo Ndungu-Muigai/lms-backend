@@ -16,7 +16,6 @@ from Generations.password import random_password
 from Generations.otp import get_otp
 import redis
 import boto3
-from botocore.exceptions import NoCredentialsError
 import io
 from api.Update import update_leave_days
 
@@ -182,16 +181,12 @@ class GenerateOTP(Resource):
 
 api.add_resource(GenerateOTP, "/generate-otp")
 
-#Resource to update the password after OTP generation
-class UpdatePasswordOTP(Resource):
+#Resource to validate the OTP
+class ValidateOTP(Resource):
     def post(self):
+        otp=request.json["otp"]
 
-        #Getting the data from the front end
-        otp=request.json['otp']
-        new_password=request.json['new_password']
-        confirm_password=request.json['confirm_password']
-
-        #Checking if the OTP exists
+        #Checking if the OTP exists in the database
         existing_otp=OneTimePassword.query.filter_by(otp=otp).first()
 
         if not existing_otp:
@@ -202,8 +197,23 @@ class UpdatePasswordOTP(Resource):
             db.session.delete(otp)
             db.session.commit()
             return make_response(jsonify({"error": "OTP has already expired"}), 409)
+        
+        r.set("otp_email", otp.email)
+        db.session.delete(otp)
+        return make_response(jsonify({"success": "OTP validated successfully!"}), 200)
+    
+api.add_resource(ValidateOTP, "/validate-otp")
 
+#Resource to update the password after OTP generation
+class UpdatePasswordOTP(Resource):
+    def post(self):
 
+        #Getting the data from the front end
+        otp=r.get("otp_email").decode("utf-8")
+        new_password=request.json['new_password']
+        confirm_password=request.json['confirm_password']
+
+        print(otp)
         # Checking if the two passwords match. If not, return an error
         if new_password != confirm_password:
             return make_response(jsonify({"error": "Passwords do not match!"}), 400)
@@ -220,8 +230,8 @@ class UpdatePasswordOTP(Resource):
             #If not, update the password and delete the otp
             employee.password=hashed_password
             db.session.add(employee)
-            db.session.delete(otp)
             db.session.commit()
+            r.delete("otp_email")
 
             #Returning a success message
             return make_response(jsonify({"success": "Password updated successfully!"}))
