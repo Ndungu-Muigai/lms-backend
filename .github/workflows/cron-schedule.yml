@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x' # Specify your Python version
+          python-version: '3.8' # Specify your Python version
 
       - name: Install dependencies
         run: |
@@ -23,4 +23,4 @@ jobs:
 
       - name: Run Python script
         run: |
-          python path/to/your_script.py
+          python Cron/Update.py
