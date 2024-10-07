@@ -138,7 +138,7 @@ class UpdatePassword(Resource):
         db.session.commit()
 
         #Returning a success response
-        return make_response(jsonify({"success": "Password updated successfully! Redirecting to the dashboard."}),201)
+        return make_response(jsonify({"success": "Password updated successfully!"}),201)
 
 api.add_resource(UpdatePassword, "/update-password")
 
