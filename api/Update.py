@@ -1,5 +1,4 @@
-from api.models import db, LeaveDays
-from api.app import app
+from .models import db, LeaveDays
 
 def update_leave_days():
     leave_days=LeaveDays.query.all()
