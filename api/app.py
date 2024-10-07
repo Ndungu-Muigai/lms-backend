@@ -231,6 +231,8 @@ class UpdatePasswordOTP(Resource):
             employee.password=hashed_password
             db.session.add(employee)
             db.session.commit()
+
+            #Delete the OTP email session
             r.delete("otp_email")
 
             #Returning a success message
