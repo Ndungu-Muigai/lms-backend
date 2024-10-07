@@ -2,9 +2,11 @@
 name: Python application
 
 on:
+  push:
+    branches:
+      - main
   schedule:
-    # Runs every minute for testing purposes; change this for your actual needs
-    - cron: '* * * * *'
+    - cron: '*/5 * * * *
 
 permissions:
   contents: read
