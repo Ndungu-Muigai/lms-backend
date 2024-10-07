@@ -232,8 +232,10 @@ api.add_resource(UpdatePasswordOTP, "/update-password-with-otp")
 class UpdateLeaveDays(Resource):
     def get(self):
         update_leave_days()
+        return(make_response(jsonify({"success": "Leave days updated successfuly"})))
 
 api.add_resource(UpdateLeaveDays, "update-leave-days")
+
 #Dashboard resource
 class Dashboard(Resource):
     def get(self):
