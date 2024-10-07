@@ -1,0 +1,26 @@
+name: Run Python script on January 1st
+
+on:
+  schedule:
+    # Runs at midnight UTC on the 1st of January every year
+    - cron: '* * * * *'
+
+jobs:
+  run-python-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x' # Specify your Python version
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt # if you have a requirements.txt
+
+      - name: Run Python script
+        run: |
+          python path/to/your_script.py
