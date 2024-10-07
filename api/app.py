@@ -193,13 +193,13 @@ class ValidateOTP(Resource):
             return make_response(jsonify({"error": "The entered OTP does not exist!"}), 404)
         
         #Checking if the timestamp is greater than 15 minutes. If it exceeds, delete the OTP and return an error
-        if datetime.now() - otp.timestamp > timedelta(minutes=15):
-            db.session.delete(otp)
+        if datetime.now() - existing_otp.timestamp > timedelta(minutes=15):
+            db.session.delete(existing_otp)
             db.session.commit()
             return make_response(jsonify({"error": "OTP has already expired"}), 409)
         
-        r.set("otp_email", otp.email)
-        db.session.delete(otp)
+        r.set("otp_email", existing_otp.email)
+        db.session.delete(existing_otp)
         return make_response(jsonify({"success": "OTP validated successfully!"}), 200)
     
 api.add_resource(ValidateOTP, "/validate-otp")
