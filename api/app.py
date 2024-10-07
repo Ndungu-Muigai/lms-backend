@@ -18,7 +18,7 @@ import redis
 import boto3
 from botocore.exceptions import NoCredentialsError
 import io
-from .api import update_leave_days
+from api.Update import update_leave_days
 
 app = Flask(__name__)
 
