@@ -199,6 +199,7 @@ class ValidateOTP(Resource):
             return make_response(jsonify({"error": "OTP has already expired"}), 409)
         
         r.set("otp_email", existing_otp.email)
+        db.session.delete(existing_otp)
         return make_response(jsonify({"success": "OTP validated successfully!"}), 200)
     
 api.add_resource(ValidateOTP, "/validate-otp")
@@ -208,23 +209,18 @@ class UpdatePasswordOTP(Resource):
     def post(self):
 
         #Getting the data from the front end
-        otp=r.get("otp_email").decode("utf-8")
+        otp_email=r.get("otp_email").decode("utf-8")
         new_password=request.json['new_password']
         confirm_password=request.json['confirm_password']
 
-        print(otp)
+        print(otp_email)
         # Checking if the two passwords match. If not, return an error
         if new_password != confirm_password:
             return make_response(jsonify({"error": "Passwords do not match!"}), 400)
-        
-        # Getting the email attached to the OTP entered
-        otp_record = OneTimePassword.query.filter_by(otp=otp).first()
 
-        if not otp_record:
-            return make_response(jsonify({"error": "Invalid or expired OTP"}), 400)
 
         #Checking if the newly entered passwords is equal to the current password
-        employee=Employee.query.filter_by(email=otp_record.email).first()
+        employee=Employee.query.filter_by(email=otp_email).first()
         
         hashed_password=hashlib.md5(new_password.encode("utf-8")).hexdigest()
 
@@ -238,7 +234,6 @@ class UpdatePasswordOTP(Resource):
             db.session.commit()
 
             #Delete the OTP email session
-            db.session.delete(otp_record)
             r.delete("otp_email")
 
             #Returning a success message
