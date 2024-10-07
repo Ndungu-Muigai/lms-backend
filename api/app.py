@@ -24,7 +24,7 @@ app = Flask(__name__)
 
 # Configuring redis
 redis_url = "redis://default:PVpzAYPpIficWlkZeiAiMRRoYFVsyWMN@autorack.proxy.rlwy.net:47050"
-r = redis.Redis.from_url(redis_url, ssl=True)
+r = redis.Redis.from_url(redis_url)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 app.config['SESSION_REDIS'] = r
