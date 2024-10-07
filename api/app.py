@@ -217,9 +217,15 @@ class UpdatePasswordOTP(Resource):
         # Checking if the two passwords match. If not, return an error
         if new_password != confirm_password:
             return make_response(jsonify({"error": "Passwords do not match!"}), 400)
+        
+        # Getting the email attached to the OTP entered
+        otp_record = OneTimePassword.query.filter_by(otp=otp).first()
+
+        if not otp_record:
+            return make_response(jsonify({"error": "Invalid or expired OTP"}), 400)
 
         #Checking if the newly entered passwords is equal to the current password
-        employee=Employee.query.filter_by(email=otp.email).first()
+        employee=Employee.query.filter_by(email=otp_record.email).first()
         
         hashed_password=hashlib.md5(new_password.encode("utf-8")).hexdigest()
 
