@@ -234,7 +234,7 @@ class UpdateLeaveDays(Resource):
         update_leave_days()
         return(make_response(jsonify({"success": "Leave days updated successfuly"})))
 
-api.add_resource(UpdateLeaveDays, "update-leave-days")
+api.add_resource(UpdateLeaveDays, "/update-leave-days")
 
 #Dashboard resource
 class Dashboard(Resource):
