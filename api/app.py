@@ -22,7 +22,7 @@ from api.Update import update_leave_days
 app = Flask(__name__)
 
 # Configuring redis
-redis_url = "rediss://red-cs2bjs3tq21c73fd73m0:dGSCFQT45nU9WFGeCzSoOxgOY73XNJpx@oregon-redis.render.com:6379"
+redis_url = "rediss://red-cs2d0d56l47c73bfkcmg:gMzPQo9v0TbKWaxY37urTYcNj3FTJyeR@oregon-redis.render.com:6379"
 r = redis.from_url(redis_url)
 
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
