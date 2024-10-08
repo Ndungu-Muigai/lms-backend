@@ -127,6 +127,7 @@ class UpdatePassword(Resource):
         #Getting the session data
         session_data=get_session_data()
 
+        print(session_data)
         #Getting the ID of the employee
         employee_id = session_data["employee_id"]
 
