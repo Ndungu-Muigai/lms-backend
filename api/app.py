@@ -127,7 +127,6 @@ class UpdatePassword(Resource):
         #Getting the session data
         session_data=get_session_data()
 
-        print(session_data)
         #Getting the ID of the employee
         employee_id = session_data["employee_id"]
 
@@ -489,9 +488,8 @@ class LeaveApplications(Resource):
             try:
                 # Upload the file to S3 and get the URL
                 s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,s3_path)
-                print("File uploaded")
+
             except Exception as e:
-                print(f"Error uploading file: {e}")
                 return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
 
             # Store the file URL in the database instead of the FileStorage object
@@ -681,8 +679,8 @@ class GetFile(Resource):
             # Use BytesIO to create a stream from the S3 file object
             file_stream = io.BytesIO(file_obj['Body'].read())
             return send_file(file_stream, as_attachment=True, attachment_filename=filename)
+            
         except Exception as e:
-            print(f"Error fetching file: {e}")
             return(make_response(jsonify({"error": "File not found"})),404)
 
 api.add_resource(GetFile, "/get-file/<path:filename>")
