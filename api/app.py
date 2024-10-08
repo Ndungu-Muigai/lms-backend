@@ -264,6 +264,7 @@ class Dashboard(Resource):
         #Getting the ID of the current logged in user
         employee_id= session.get("employee_id")
 
+        print(employee_id)
         #If a user is logged in, fetch his/her data
         #Counting the leave applications and returning the response to the front end
         total_requests = LeaveApplication.query.filter(LeaveApplication.employee_id == employee_id).count()
