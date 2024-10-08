@@ -22,34 +22,30 @@ from api.Update import update_leave_days
 app = Flask(__name__)
 
 # Configuring redis
-r=redis.from_url("rediss://red-cs2f4956l47c73bgt4c0:vfHKfN8YalQnHnhGXV01tooGpCe8ugtf@oregon-redis.render.com:6379")
+r = redis.from_url("rediss://red-cs2f4956l47c73bgt4c0:vfHKfN8YalQnHnhGXV01tooGpCe8ugtf@oregon-redis.render.com:6379")
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 app.config['SESSION_REDIS'] = r
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
-
 # Configuring the database
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
-
-# # Configuring the file uploads
-# app.config["UPLOAD_FOLDER"] = './static/Uploads'
 
 # Email sender configuration
 app.config["SENDER_NAME"] = "Leave Management System"
 app.config["SENDER_EMAIL"] = "lms@mobikey.co.ke"
 app.static_folder = 'static'
 
-#AWS S3 configuration
-S3_BUCKET_NAME=os.getenv("S3_BUCKET_NAME")
-S3_REGION=os.getenv("S3_REGION")
-S3_ACCESS_KEY=os.getenv("S3_ACCESS_KEY")
-S3_SECRET_ACCESS_KEY=os.getenv("S3_SECRET_ACCESS_KEY")
+# AWS S3 configuration
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+S3_REGION = os.getenv("S3_REGION")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
+S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY")
 
-s3=boto3.client("s3", region_name=S3_REGION, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_ACCESS_KEY)
+s3 = boto3.client("s3", region_name=S3_REGION, aws_access_key_id=S3_ACCESS_KEY, aws_secret_access_key=S3_SECRET_ACCESS_KEY)
 
 # Initializing the migration
 migrate = Migrate(app, db)
@@ -61,43 +57,54 @@ Session(app)
 # Wrapping the app as an API instance
 api = Api(app)
 
-#Index resource
+# Index resource
 class Index(Resource):
     def get(self):
         return make_response(jsonify({"message": "Welcome to the Mobikey LMS backend"}))
-    
+
 api.add_resource(Index, "/")
 
-#Login resource
+# Login resource
 class Login(Resource):
     def post(self):
-        #Getting the infprmation from the form
-        username=request.json["username"].lower() #Converting username to lower case in case user enters the username in all caps
-        password=request.json["password"]
+        # Getting the information from the form
+        username = request.json["username"].lower()  # Converting username to lower case
+        password = request.json["password"]
 
-        #Querying the database to check if the employee exists based on the username
-        employee=Employee.query.filter_by(username=username).first()
+        # Querying the database to check if the employee exists based on the username
+        employee = Employee.query.filter_by(username=username).first()
 
-        #If the username doesn't exists, return an error
+        # If the username doesn't exist, return an error
         if not employee:
             return make_response(jsonify({"error": "Incorrect username!"}), 409)
-        
-        #If the password is incorrect, return an error
-        elif employee.password!= hashlib.md5(password.encode("utf-8")).hexdigest():
-            return make_response(jsonify({"error": "Incorrect password!"}), 409)
-        
-        #Creating sessions that will be used later on in the program 
-        r.set("employee_id",employee.id)
-        r.set("employee_role",employee.role)
-        r.set("employee_department",employee.department)
-        r.set("employee_country",employee.country)
 
-        #Returning a success message once a user is successfully authenticated
+        # If the password is incorrect, return an error
+        elif employee.password != hashlib.md5(password.encode("utf-8")).hexdigest():
+            return make_response(jsonify({"error": "Incorrect password!"}), 409)
+
+        # Create a unique session identifier
+        session_id = str(uuid.uuid4())
+
+        # Storing session information in Redis with a unique key
+        session_data = {
+            "employee_id": employee.id,
+            "employee_role": employee.role,
+            "employee_department": employee.department,
+            "employee_country": employee.country,
+            "timestamp": datetime.now().isoformat()  # You can store additional info if needed
+        }
+        
+        # Set the session data in Redis with the unique session ID
+        r.set(f"session:{session_id}", session_data)
+
+        # Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
             {
                 "success": "Login successful!",
-                "first_login": employee.first_login
-            }))
+                "first_login": employee.first_login,
+                "session_id": session_id  # Return the session ID to the client
+            }
+        ))
 
 api.add_resource(Login, "/login")
 
