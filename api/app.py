@@ -62,7 +62,7 @@ api = Api(app)
 def get_session_data():
     session_id=request.headers.get("X-Session-ID")
 
-    session_data=r.get(f("session:{session_id}"))
+    session_data=r.get(f"session:{session_id}")
 
     if not session_data:
         return make_response(jsonify({"error": "Kindly login to continue"}))
