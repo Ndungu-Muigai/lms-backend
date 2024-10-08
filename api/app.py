@@ -66,7 +66,7 @@ def get_session_data():
 
     if not session_data:
         return make_response(jsonify({"error": "Kindly login to continue"}))
-    print(json.loads(session_data))
+
     return json.loads(session_data) 
 
 # Index resource
