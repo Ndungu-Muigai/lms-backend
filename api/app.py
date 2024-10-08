@@ -24,12 +24,14 @@ app = Flask(__name__)
 # Configuring redis
 redis_url = "rediss://red-cs2d0d56l47c73bfkcmg:gMzPQo9v0TbKWaxY37urTYcNj3FTJyeR@oregon-redis.render.com:6379"
 r = redis.from_url(redis_url)
-
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 app.config['SESSION_REDIS'] = r
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+app.config['SESSION_COOKIE_SECURE'] = True  # for HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 
 # Configuring the database
@@ -923,7 +925,6 @@ class Logout(Resource):
     def post(self):
         #Clear all sessions
         session.clear()
-        r.delete("employee_id","employee_department","employee_role","employee_country")
         #Return a response
         return make_response(jsonify({"success": "Logged out successfully"}), 200)
     
