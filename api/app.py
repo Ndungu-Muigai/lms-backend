@@ -127,6 +127,9 @@ class UpdatePassword(Resource):
         #Getting the session data
         session_data=get_session_data()
 
+        if isinstance(session_data, Response):
+            return session_data
+
         #Getting the ID of the employee
         employee_id = session_data["employee_id"]
 
@@ -387,6 +390,9 @@ class LeaveApplications(Resource):
         #Getting the session data
         session_data=get_session_data()
 
+        if isinstance(session_data, Response):
+            return session_data
+
         #Get the currently logged in user
         employee_id = session_data["employee_id"]
 
@@ -414,6 +420,9 @@ class LeaveApplications(Resource):
         
         #Getting the session data
         session_data=get_session_data()
+
+        if isinstance(session_data, Response):
+            return session_data
 
         # Get the employee ID from the session
         employee_id = session_data["employee_id"]
@@ -564,6 +573,9 @@ class PendingEmployeeRequests(Resource):
         #Getting the session data
         session_data=get_session_data()
 
+        if isinstance(session_data, Response):
+            return session_data
+
         #Getting the session data which will be used to query the leave applications table
         employee_id = session_data["employee_id"]
         role = session_data["employee_role"]
@@ -616,6 +628,9 @@ class PendingEmployeeRequestsByID(Resource):
 
         #Getting the session data
         session_data=get_session_data()
+
+        if isinstance(session_data, Response):
+            return session_data
 
         #Getting the approval status (Approved or Rejected) from the frontend
         status=request.json["status"]
@@ -695,6 +710,9 @@ class Employees(Resource):
         
         #Getting the session data
         session_data=get_session_data()
+
+        if isinstance(session_data, Response):
+            return session_data
 
         #Getting the employee id
         employee_id = session_data["employee_id"]
@@ -861,6 +879,9 @@ class Profile(Resource):
         #Getting the session data
         session_data=get_session_data()
 
+        if isinstance(session_data, Response):
+            return session_data
+
         #Getting the ID of the current logged in user
         employee_id = session_data["employee_id"]
 
@@ -878,6 +899,9 @@ class Profile(Resource):
 
         #Getting the session data
         session_data=get_session_data()
+
+        if isinstance(session_data, Response):
+            return session_data
 
         #Getting the attributes from the form
         current_password=request.json["current_password"]
@@ -912,6 +936,9 @@ class Profile(Resource):
     def patch(self):
         #Getting the session data
         session_data=get_session_data()
+
+        if isinstance(session_data, Response):
+            return session_data
 
         # Get the new profile image
         profile_image = request.files.get("profile_image")
