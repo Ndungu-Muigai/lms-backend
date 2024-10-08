@@ -88,11 +88,17 @@ class Login(Resource):
         elif employee.password!= hashlib.md5(password.encode("utf-8")).hexdigest():
             return make_response(jsonify({"error": "Incorrect password!"}), 409)
         
-        #Creating sessions that will be used later on in the program 
-        r.set("employee_id",employee.id)
-        r.set("employee_role",employee.role)
-        r.set("employee_department",employee.department)
-        r.set("employee_country",employee.country)
+        # #Creating sessions that will be used later on in the program 
+        # r.set("employee_id",employee.id)
+        # r.set("employee_role",employee.role)
+        # r.set("employee_department",employee.department)
+        # r.set("employee_country",employee.country)
+
+        # Use Flask session to store employee information
+        session['employee_id'] = employee.id
+        session['employee_role'] = employee.role
+        session['employee_department'] = employee.department
+        session['employee_country'] = employee.country
 
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
