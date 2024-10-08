@@ -22,7 +22,7 @@ from api.Update import update_leave_days
 app = Flask(__name__)
 
 # Configuring redis
-r=redis.Redis(host="witty-anemone-44477.upstash.io", port=6379, password=os.getenv("REDIS_PASSWORD"), ssl=True)
+r=redis.from_url("redis://:vfHKfN8YalQnHnhGXV01tooGpCe8ugtf@oregon-redis.render.com:6379")
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SESSION_TYPE"] = "redis"
 app.config['SESSION_REDIS'] = r
