@@ -17,6 +17,7 @@ from Generations.otp import get_otp
 import redis
 import boto3
 import io
+import json
 from api.Update import update_leave_days
 
 app = Flask(__name__)
@@ -95,7 +96,7 @@ class Login(Resource):
         }
         
         # Set the session data in Redis with the unique session ID
-        r.set(f"session:{session_id}", session_data)
+        r.set(f"session:{session_id}", json.dumps(session_data))
 
         # Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
