@@ -27,11 +27,11 @@ if __name__ == "__main__":
         db.session.commit()
 
         david_tundo=Employee(first_name="David",last_name="Tundo", gender="Male", email="david.tundo@mobikey.co.ke", username="dtundo", country="KE", phone="+254793305103", department="Finance", position="Tax and Admin Manager", role="HOD", password="f30da452351da3baea61fa20ac419010")
-        db.session.add(samuel_muigai)
+        db.session.add(david_tundo)
         db.session.commit()
 
         tundo_leave_days=LeaveDays(employee_id=david_tundo.id, normal_leave=21, sick_leave=14, maternity_leave=0, paternity_leave=14)
-        db.session.add(muigai_leave_days)
+        db.session.add(tundo_leave_days)
         db.session.commit()
 
         print("Information added successfully")
