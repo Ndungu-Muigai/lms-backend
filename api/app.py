@@ -99,6 +99,8 @@ class Login(Resource):
         session['employee_department'] = employee.department
         session['employee_country'] = employee.country
 
+        print(session["employee_id"])
+
         #Returning a success message once a user is successfully authenticated
         return make_response(jsonify(
             {
