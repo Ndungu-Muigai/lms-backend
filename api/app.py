@@ -58,6 +58,17 @@ Session(app)
 # Wrapping the app as an API instance
 api = Api(app)
 
+#Function to extract session data
+def get_session_data():
+    session_id=request.headers.get("X-Session-ID")
+
+    session_data=r.get(f("session:{session_id}"))
+
+    if not session_data:
+        return make_response(jsonify({"error": "Kindly login to continue"}))
+
+    return json.loads(session_data) 
+
 # Index resource
 class Index(Resource):
     def get(self):
@@ -113,8 +124,11 @@ api.add_resource(Login, "/login")
 class UpdatePassword(Resource):
     def post(self):
 
+        #Getting the session data
+        session_data=get_session_data()
+
         #Getting the ID of the employee
-        employee_id=r.get("employee_id").decode("utf-8")
+        employee_id = session_data["employee_id"]
 
         #Getting the form data
         password=request.json["new_password"]
@@ -161,7 +175,6 @@ class GenerateOTP(Resource):
         employee_record=Employee.query.filter_by(email=email).first()
 
         if not employee_record:
-            print('Not there')
             return make_response(jsonify({"error": "No account with the given email exists!"}), 404)
 
         #If email exists, generate a OTP
@@ -221,7 +234,6 @@ class UpdatePasswordOTP(Resource):
         new_password=request.json['new_password']
         confirm_password=request.json['confirm_password']
 
-        print(otp_email)
         # Checking if the two passwords match. If not, return an error
         if new_password != confirm_password:
             return make_response(jsonify({"error": "Passwords do not match!"}), 400)
@@ -261,8 +273,11 @@ api.add_resource(UpdateLeaveDays, "/update-leave-days")
 class Dashboard(Resource):
     def get(self):
 
-        #Getting the ID of the current logged in user
-        employee_id= r.get("employee_id").decode("utf-8")
+        #Getting the session data
+        session_data=get_session_data()
+
+        #Getting the ID of the employee
+        employee_id = session_data["employee_id"]
 
         #If a user is logged in, fetch his/her data
         #Counting the leave applications and returning the response to the front end
@@ -310,9 +325,9 @@ class Dashboard(Resource):
         pending_requests_count = 0
         
         #Getting the pending leave requests count
-        role=r.get("employee_role").decode("utf-8")
-        department=r.get("employee_department").decode("utf-8")
-        country=r.get("employee_country").decode("utf-8")
+        role = session_data["employee_role"]
+        department=session_data["employee_department"]
+        country=session_data["employee_country"]
 
         #Getting the requests based on the user's role
         if role == "HOD":
@@ -347,7 +362,7 @@ class Dashboard(Resource):
                 "success": "Logged in successfully",
                 "full_name": employee.full_name(),
                 "username": employee.username,
-                "role": r.get("employee_role").decode("utf-8"),
+                "role": session_data["employee_role"],
                 "leave_days":
                 {
                     "total_requests": total_requests,
@@ -366,8 +381,11 @@ api.add_resource(Dashboard, "/dashboard")
 class LeaveApplications(Resource):
     def get(self):
 
+        #Getting the session data
+        session_data=get_session_data()
+
         #Get the currently logged in user
-        employee_id=r.get("employee_id").decode("utf-8")
+        employee_id = session_data["employee_id"]
 
         #Get the user's leave applications and create a dict of it
         leave_applications=LeaveApplication.query.filter_by(employee_id=employee_id).all()
@@ -390,9 +408,12 @@ class LeaveApplications(Resource):
         ),200)
     
     def post(self):
+        
+        #Getting the session data
+        session_data=get_session_data()
 
         # Get the employee ID from the session
-        employee_id = r.get("employee_id").decode("utf-8")
+        employee_id = session_data["employee_id"]
 
         # Getting the values from the form
         leave_type = request.form.get("leave_type")
@@ -478,7 +499,7 @@ class LeaveApplications(Resource):
             file_attachment = None
 
         #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
-        employee_role=r.get("employee_role").decode("utf-8")
+        employee_role = session_data["employee_role"]
         if employee_role == "HOD":
             new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
 
@@ -536,11 +557,15 @@ api.add_resource(ApprovedRequests, "/approved-requests")
 #All pending employee requests
 class PendingEmployeeRequests(Resource):
     def get(self):
+
+        #Getting the session data
+        session_data=get_session_data()
+
         #Getting the session data which will be used to query the leave applications table
-        employee_id=r.get("employee_id").decode("utf-8")
-        role=r.get("employee_role").decode("utf-8")
-        department=r.get("employee_department").decode("utf-8")
-        country=r.get("employee_country").decode("utf-8")
+        employee_id = session_data["employee_id"]
+        role = session_data["employee_role"]
+        department=session_data["employee_department"]
+        country=session_data["employee_country"]
 
         #Displaying the requests based on the user's role
         if role == "HOD":
@@ -585,10 +610,14 @@ class PendingEmployeeRequestsByID(Resource):
     
     #Patch request to update the request
     def patch(self, id):
+
+        #Getting the session data
+        session_data=get_session_data()
+
         #Getting the approval status (Approved or Rejected) from the frontend
         status=request.json["status"]
         #Getting the role of the currently logged in employee
-        role=r.get("employee_role").decode("utf-8")
+        role = session_data["employee_role"]
         
         #Getting the request from the database
         application=LeaveApplication.query.filter_by(id=id).first()
@@ -660,14 +689,18 @@ api.add_resource(GetFile, "/get-file/<path:filename>")
 #All employees resource
 class Employees(Resource):
     def get(self):
+        
+        #Getting the session data
+        session_data=get_session_data()
+
         #Getting the employee id
-        employee_id=r.get("employee_id").decode("utf-8")
+        employee_id = session_data["employee_id"]
 
         #Getting the employee country
-        employee_country=r.get("employee_country").decode("utf-8")
+        employee_country=session_data["employee_country"]
 
         #Getting the role of the currently logged in user
-        employee_role=r.get("employee_role").decode("utf-8")
+        employee_role=session_data["employee_role"]
         
         #If the role is not HR, return an error
         if employee_role != "HR":
@@ -822,8 +855,11 @@ api.add_resource(EmployeeByID, "/employees-data/<int:id>")
 #Profile resource
 class Profile(Resource):
     def get(self):
+        #Getting the session data
+        session_data=get_session_data()
+
         #Getting the ID of the current logged in user
-        employee_id=r.get("employee_id").decode("utf-8")
+        employee_id = session_data["employee_id"]
 
         #If no one is logged in, return an error
         if not employee_id:
@@ -837,13 +873,16 @@ class Profile(Resource):
     #Password update functionality in the profile page
     def post(self):
 
+        #Getting the session data
+        session_data=get_session_data()
+
         #Getting the attributes from the form
         current_password=request.json["current_password"]
         new_password=request.json["new_password"]
         confirm_password=request.json["confirm_password"]
 
         #Getting the current logged in employee
-        employee=Employee.query.filter(Employee.id==r.get("employee_id").decode("utf-8")).first()
+        employee=Employee.query.filter(Employee.id==session_data["employee_id"]).first()
 
         #Hashing the password 
         hashed_password=hashlib.md5(new_password.encode()).hexdigest()
@@ -868,6 +907,9 @@ class Profile(Resource):
         return make_response(jsonify({"success": "Password updated successfully"}))
 
     def patch(self):
+        #Getting the session data
+        session_data=get_session_data()
+
         # Get the new profile image
         profile_image = request.files.get("profile_image")
 
@@ -881,7 +923,7 @@ class Profile(Resource):
         s3_path = f"images/{unique_profile_image_name}"
 
         # Get the employee ID from the session or request
-        employee_id = r.get("employee_id").decode("utf-8")
+        employee_id = session_data["employee_id"]
         employee = Employee.query.filter_by(id=employee_id).first()
 
         if not employee:
@@ -894,15 +936,13 @@ class Profile(Resource):
             # Delete the old image from S3
             try:
                 s3.delete_object(Bucket=S3_BUCKET_NAME, Key=old_s3_path)
-                print(f"Old profile image deleted: {old_s3_path}")
+
             except Exception as e:
-                print(f"Error deleting old profile image: {e}")
                 return make_response(jsonify({"error": "Error deleting old profile image. Please try again later!"}), 500)
 
         # Upload the new file to S3
         try:
             s3.upload_fileobj(profile_image, S3_BUCKET_NAME, s3_path)
-            print("Profile image updated")
 
             # Update the profile picture in the database with the new unique file name
             employee.profile_picture = unique_profile_image_name
@@ -911,19 +951,16 @@ class Profile(Resource):
 
             return make_response(jsonify({"success": "Profile picture updated successfully!"}), 200)
         except Exception as e:
-            print(f"Error uploading file: {e}")
             return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
-
-  
 
 api.add_resource(Profile, "/profile")
 
 #Logout resource
 class Logout(Resource):
     def post(self):
-        #Clear all sessions
-        session.clear()
-        r.delete("employee_id","employee_department","employee_role","employee_country")
+        session_id = request.headers.get('X-Session-ID')
+        if session_id:
+            r.delete(f"session:{session_id}")
         #Return a response
         return make_response(jsonify({"success": "Logged out successfully"}), 200)
     
