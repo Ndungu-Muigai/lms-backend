@@ -511,7 +511,7 @@ class LeaveApplications(Resource):
 
         #Adding the changes made to the leave days and the newly created leave application
         db.session.add_all([new_application, leave_days])
-        db.session.commit()
+        # db.session.commit()
 
         #Querying the database for the employee's superior
         employee_department=session_data["employee_department"]
@@ -524,6 +524,9 @@ class LeaveApplications(Resource):
             superior=Employee.query.filter(Employee.role=="HOD", Employee.department==employee_department).first()
             print(superior)
             send_submitted_application(fullName=superior.full_name(), email=superior.email, employeeName=Employee.query.filter_by(id=employee_id).first().full_name, startDate=start_date, endDate=end_date, duration=leave_duration, applicationID=new_application.id)
+
+        #Commiting the changes made to the database
+        db.session.commit()
 
         #Creating a response
         return make_response(jsonify(
