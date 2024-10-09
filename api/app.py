@@ -732,47 +732,47 @@ class Employees(Resource):
         username=(first_name[0]+last_name).lower()
         password=random_password()
 
-        print(password)
-
-        # #Checking if the email exists in the database. If it does, return an error
-        # if Employee.query.filter_by(email=email).first():
-        #     return make_response(jsonify({"error" : "Email already exists"}),409)
+        #Checking if the email exists in the database. If it does, return an error
+        if Employee.query.filter_by(email=email).first():
+            return make_response(jsonify({"error" : "Email already exists"}),409)
         
-        # #Checking if the phone number exists in the database. If it does, return an error
-        # if Employee.query.filter_by(phone=phone).first():
-        #     return make_response(jsonify({"error" : "Phone number already exists"}),409)
+        #Checking if the phone number exists in the database. If it does, return an error
+        if Employee.query.filter_by(phone=phone).first():
+            return make_response(jsonify({"error" : "Phone number already exists"}),409)
         
-        # #Checking if the username exists in the database. If it does, return an error
-        # elif Employee.query.filter_by(username=username).first():
-        #     return make_response(jsonify({"error" : "Username already exists"}),409)
+        #Checking if the username exists in the database. If it does, return an error
+        elif Employee.query.filter_by(username=username).first():
+            return make_response(jsonify({"error" : "Username already exists"}),409)
         
-        # #Creating the account details
-        # hashed_password=hashlib.md5(password.encode("utf-8")).hexdigest()
-        # new_employee=Employee(first_name=first_name, username=username, password=hashed_password, last_name=last_name, gender=gender, department=department, country=country, phone=phone, role=role, position=position, email=email)
+        #Hashing the password
+        hashed_password=hashlib.md5(password.encode("utf-8")).hexdigest()
 
-        # #Sending the email with the login credentials
-        # send_login_credentials(last_name=last_name, username=username, first_name=first_name, email=email, password=password)
+        #Creating the employee's account
+        new_employee=Employee(first_name=first_name, username=username, password=hashed_password, last_name=last_name, gender=gender, department=department, country=country, phone=phone, role=role, position=position, email=email)
 
-        # #Creating an employee's leave days once their account is created
-        # if new_employee.gender=="Male":
-        #     leave_days=LeaveDays(employee=new_employee,normal_leave=21, sick_leave=14, paternity_leave=14, maternity_leave=0)
+        #Sending the email with the login credentials
+        send_login_credentials(last_name=last_name, username=username, first_name=first_name, email=email, password=password)
 
-        # elif new_employee.gender == "Female":
-        #     leave_days=LeaveDays(employee=new_employee,normal_leave=21, sick_leave=14, paternity_leave=0, maternity_leave=90)
+        #Creating an employee's leave days once their account is created
+        if new_employee.gender=="Male":
+            leave_days=LeaveDays(employee=new_employee,normal_leave=21, sick_leave=14, paternity_leave=14, maternity_leave=0)
 
-        # #Committing the info to the database
-        # db.session.add_all([new_employee, leave_days])
-        # db.session.commit()
+        elif new_employee.gender == "Female":
+            leave_days=LeaveDays(employee=new_employee,normal_leave=21, sick_leave=14, paternity_leave=0, maternity_leave=90)
 
-        # #Creating a dict of the newly created account and including it in the response
-        # employee=EmployeeSchema().dump(new_employee)
+        #Committing the info to the database
+        db.session.add_all([new_employee, leave_days])
+        db.session.commit()
 
-        # return make_response(jsonify(
-        #     {
-        #         "success": "Employee account created successfully",
-        #         "employee_data": employee
-        #     }
-        # ), 201)
+        #Creating a dict of the newly created account and including it in the response
+        employee=EmployeeSchema().dump(new_employee)
+
+        return make_response(jsonify(
+            {
+                "success": "Employee account created successfully",
+                "employee_data": employee
+            }
+        ), 201)
     
 api.add_resource(Employees, "/employees-data")
 
