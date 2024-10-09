@@ -519,11 +519,11 @@ class LeaveApplications(Resource):
         if employee_role == "User":
             superior=Employee.query.filter(Employee.role=="HOD", Employee.department==employee_department).first()
             print(superior)
-            send_submitted_application(fullName=superior.full_name(), email=superior.email, startDate=start_date, endDate=end_date, duration=leave_duration, applicationID=new_application.id)
+            send_submitted_application(fullName=superior.full_name(), email=superior.email, employeeName=Employee.query.filter_by(id=employee_id).first().full_name, startDate=start_date, endDate=end_date, duration=leave_duration, applicationID=new_application.id)
         elif employee_role == "HOD" or employee_role == "HR":
             superior=Employee.query.filter(Employee.role=="HOD", Employee.department==employee_department).first()
             print(superior)
-            send_submitted_application(fullName=superior.full_name(), email=superior.email, startDate=start_date, endDate=end_date, duration=leave_duration, applicationID=new_application.id)
+            send_submitted_application(fullName=superior.full_name(), email=superior.email, employeeName=Employee.query.filter_by(id=employee_id).first().full_name, startDate=start_date, endDate=end_date, duration=leave_duration, applicationID=new_application.id)
 
         #Creating a response
         return make_response(jsonify(
