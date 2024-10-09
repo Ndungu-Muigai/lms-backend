@@ -516,10 +516,10 @@ class LeaveApplications(Resource):
         employee_department=session_data["employee_department"]
 
         if employee_role == "User":
-            superior=Employee.query.filter(Employee.role=="HOD", department=employee_department).first()
+            superior=Employee.query.filter(Employee.role=="HOD", Employee.department==employee_department).first()
             print(superior)
         elif employee_role == "HOD" or employee_role == "HR":
-            superior=Employee.query.filter(Employee.role=="HOD", department=employee_department).first()
+            superior=Employee.query.filter(Employee.role=="HOD", Employee.department==employee_department).first()
             print(superior)
 
         #Creating a response
