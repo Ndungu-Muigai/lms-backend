@@ -498,7 +498,7 @@ class LeaveApplications(Resource):
         #     file_attachment = None
 
         # #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
-        # employee_role = session_data["employee_role"]
+        employee_role = session_data["employee_role"]
         # if employee_role == "HOD":
         #     new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
 
