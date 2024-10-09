@@ -437,87 +437,97 @@ class LeaveApplications(Resource):
         if leaveapplication:
             return make_response(jsonify({"error": "An application with the given details already exists"}), 409)
         
-        #Checking if the leave days being requested are greater than the number of leave days the employee has
-        leave_days=LeaveDays.query.filter_by(employee_id=employee_id).first()
+        # #Checking if the leave days being requested are greater than the number of leave days the employee has
+        # leave_days=LeaveDays.query.filter_by(employee_id=employee_id).first()
 
-        if leave_type == "Normal":
-            days_balance= float(leave_days.normal_leave) - float(total_days)
+        # if leave_type == "Normal":
+        #     days_balance= float(leave_days.normal_leave) - float(total_days)
 
-            #If leave balance is less than or equal to 0, return error. Else, update the leave days table
-            if days_balance < 0:
-                return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
+        #     #If leave balance is less than or equal to 0, return error. Else, update the leave days table
+        #     if days_balance < 0:
+        #         return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
 
-            leave_days.normal_leave=days_balance
+        #     leave_days.normal_leave=days_balance
 
-        elif leave_type == "Sick":
-            days_balance= float(leave_days.sick_leave) - float(total_days)
+        # elif leave_type == "Sick":
+        #     days_balance= float(leave_days.sick_leave) - float(total_days)
 
-            if days_balance < 0:
-                return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
+        #     if days_balance < 0:
+        #         return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
             
-            leave_days.sick_leave=days_balance
+        #     leave_days.sick_leave=days_balance
 
-        elif leave_type == "Paternity":
-            days_balance= float(leave_days.paternity_leave) - float(total_days)
+        # elif leave_type == "Paternity":
+        #     days_balance= float(leave_days.paternity_leave) - float(total_days)
 
-            if days_balance < 0:
-                return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
+        #     if days_balance < 0:
+        #         return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
             
-            leave_days.paternity_leave=days_balance
+        #     leave_days.paternity_leave=days_balance
 
-        elif leave_type == "Maternity":
-            days_balance= float(leave_days.maternity_leave) - float(total_days)
+        # elif leave_type == "Maternity":
+        #     days_balance= float(leave_days.maternity_leave) - float(total_days)
 
-            if days_balance < 0:
-                return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
+        #     if days_balance < 0:
+        #         return make_response(jsonify({"error": "You do not have enough leave days"}), 409)
             
-            leave_days.maternity_leave=days_balance
+        #     leave_days.maternity_leave=days_balance
 
-        #If there is a file attachment, generate a unique file name and save it to the Uploads folder
-        if file_attachment:
-            # Getting the secure filename
-            file_name = secure_filename(file_attachment.filename)
+        # #If there is a file attachment, generate a unique file name and save it to the Uploads folder
+        # if file_attachment:
+        #     # Getting the secure filename
+        #     file_name = secure_filename(file_attachment.filename)
 
-            # Generating a unique ID for each file name
-            unique_file_name = str(uuid.uuid1()) + "_" + file_name
+        #     # Generating a unique ID for each file name
+        #     unique_file_name = str(uuid.uuid1()) + "_" + file_name
 
-            # Path in the S3 bucket
-            s3_path = f'uploads/{unique_file_name}'
+        #     # Path in the S3 bucket
+        #     s3_path = f'uploads/{unique_file_name}'
 
-            # Saving the file to S3 bucket
-            try:
-                # Upload the file to S3 and get the URL
-                s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,s3_path)
+        #     # Saving the file to S3 bucket
+        #     try:
+        #         # Upload the file to S3 and get the URL
+        #         s3.upload_fileobj(file_attachment,S3_BUCKET_NAME,s3_path)
 
-            except Exception as e:
-                return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
+        #     except Exception as e:
+        #         return make_response(jsonify({"error": "Error uploading file. Please try again later!"}), 500)
 
-            # Store the file URL in the database instead of the FileStorage object
-            file_attachment = unique_file_name
-        else:
-            file_attachment = None
+        #     # Store the file URL in the database instead of the FileStorage object
+        #     file_attachment = unique_file_name
+        # else:
+        #     file_attachment = None
 
-        #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
-        employee_role = session_data["employee_role"]
-        if employee_role == "HOD":
-            new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
+        # #Checking if the employee is either a HOD, HR or GM and updating those fields accordingly
+        # employee_role = session_data["employee_role"]
+        # if employee_role == "HOD":
+        #     new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved")
 
-        elif employee_role== "HR":
-            new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved", hr_status="Approved")
+        # elif employee_role== "HR":
+        #     new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id, hod_status="Approved", hr_status="Approved")
 
-        else:
-            new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id)
+        # else:
+        #     new_application=LeaveApplication(leave_type=leave_type, leave_duration=leave_duration, start_date=start_date, end_date=end_date, total_days=total_days, reason=reason, file_attachment=file_attachment, employee_id=employee_id)
 
-        #Adding the changes made to the leave days and the newly created leave application
-        db.session.add_all([new_application, leave_days])
-        db.session.commit()
+        # #Adding the changes made to the leave days and the newly created leave application
+        # db.session.add_all([new_application, leave_days])
+        # db.session.commit()
+
+        #Querying the database for the employee's superior
+        employee_department=session_data["employee_department"]
+
+        if employee_role == "User":
+            superior=Employee.query.filter(role=="HOD", department=employee_department).first()
+            print(superior)
+        elif employee_role == "HOD" or employee_role == "HR":
+            superior=Employee.query.filter(role=="HOD", department=employee_department).first()
+            print(superior)
 
         #Creating a response
-        return make_response(jsonify(
-            {
-                "success": "Application submitted successfully",
-                "application": LeaveApplicationsSchema().dump(new_application)
-            }), 200)
+        # return make_response(jsonify(
+        #     {
+        #         "success": "Application submitted successfully",
+        #         "application": LeaveApplicationsSchema().dump(new_application)
+        #     }), 200)
 
 api.add_resource(LeaveApplications, "/leave-applications")
 
