@@ -5,6 +5,7 @@ class EmployeeSchema(Schema):
     first_name=fields.Str(required=True)
     last_name=fields.Str(required=True)
     email=fields.Email(required=True)
+    branch=fields.Str(required=True)
     country=fields.Str(required=True)
     phone=fields.String(required=True)
     gender=fields.Str(required=True)
