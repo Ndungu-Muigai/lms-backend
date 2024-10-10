@@ -779,7 +779,7 @@ class Employees(Resource):
             {
                 "success": "You have access rights",
                 "employee_data": employee_dict,
-                "role": employee_role
+                "country": employee_country
             }
         ), 200)
     
