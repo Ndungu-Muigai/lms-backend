@@ -778,7 +778,8 @@ class Employees(Resource):
         return make_response(jsonify(
             {
                 "success": "You have access rights",
-                "employee_data": employee_dict
+                "employee_data": employee_dict,
+                "role": employee_role
             }
         ), 200)
     

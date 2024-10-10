@@ -11,7 +11,7 @@ class Employee(db.Model):
     first_name=db.Column(db.String, nullable=False)
     last_name=db.Column(db.String, nullable=False)
     email=db.Column(db.String, unique=True, nullable=False)
-    branch=db.Column(db.String, nullable=False, default="Mobikey Kenya")
+    branch=db.Column(db.String, nullable=False)
     country=db.Column(db.String, unique=False, nullable=False)
     phone=db.Column(db.String, unique=True, nullable=False)
     gender=db.Column(db.String, nullable=False)
