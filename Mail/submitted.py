@@ -33,13 +33,12 @@ def send_submitted_application(fullName, email, employeeName, startDate, endDate
     try:
         # Attempt to send the email
         api_instance.send_transac_email(send_email)
-        print(f"Email successfully sent to {email}")
 
     except sib_api_v3_sdk.rest.ApiException as e:
         # Catch any API-related errors and print/log the error details
         print(f"Error sending email to {email}: {e}")
-        return {"error": "Failed to send email. Please try again later."}
+        return {"error": "An unexpected error occurred. Please try again later!"}
     except Exception as e:
         # Catch any other errors that may occur
         print(f"Unexpected error: {e}")
-        return {"error": "An unexpected error occurred while sending the email."}
+        return {"error": "An unexpected error occurred. Please try again later!"}

@@ -23,4 +23,15 @@ def send_otp(email, otp, first_name, last_name):
     to= [{"name": f"{first_name} {last_name}", "email": email}]
     send_email=sib_api_v3_sdk.SendSmtpEmail(to=to, html_content=content,sender=sender, subject=subject)
 
-    api_instance.send_transac_email(send_email)
+    try:
+        # Attempt to send the email
+        api_instance.send_transac_email(send_email)
+
+    except sib_api_v3_sdk.rest.ApiException as e:
+        # Catch any API-related errors and print/log the error details
+        print(f"Error sending email to {email}: {e}")
+        return {"error": "An unexpected error occurred. Please try again later!"}
+    except Exception as e:
+        # Catch any other errors that may occur
+        print(f"Unexpected error: {e}")
+        return {"error": "An unexpected error occurred. Please try again later!"}
