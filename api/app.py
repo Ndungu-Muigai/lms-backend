@@ -518,23 +518,32 @@ class LeaveApplications(Resource):
         #Querying the database for the employee's superior
         employee_department=session_data["employee_department"]
 
+        superior=""
+
         if employee_role == "User":
             superior=Employee.query.filter(Employee.role=="HOD", Employee.department==employee_department).first()
-            send_submitted_application(fullName=superior.full_name(), email=superior.email, employeeName=Employee.query.filter_by(id=employee_id).first().full_name(), startDate=start_date, endDate=end_date, duration=leave_duration, applicationID=new_application.id)
+            return superior
         
         elif employee_role == "HOD" or employee_role == "HR":
             superior=Employee.query.filter(Employee.role=="HOD", Employee.department==employee_department).first()
+            return superior
+
+        try:
             send_submitted_application(fullName=superior.full_name(), email=superior.email, employeeName=Employee.query.filter_by(id=employee_id).first().full_name(), startDate=start_date, endDate=end_date, duration=leave_duration, applicationID=new_application.id)
 
-        #Commiting the changes made to the database
-        db.session.commit()
+            #Commiting the changes made to the database
+            db.session.commit()
 
-        #Creating a response
-        return make_response(jsonify(
-            {
-                "success": "Application submitted successfully",
-                "application": LeaveApplicationsSchema().dump(new_application)
-            }), 200)
+            #Creating a response
+            return make_response(jsonify(
+                {
+                    "success": "Application submitted successfully",
+                    "application": LeaveApplicationsSchema().dump(new_application)
+                }), 200)
+        
+        except Exception as e:
+            print(e)
+            return make_response(jsonify({"error": "Error submitting leave request. Please try again later"}))
 
 api.add_resource(LeaveApplications, "/leave-applications")
 
@@ -657,21 +666,31 @@ class PendingEmployeeRequestsByID(Resource):
         elif role == "HR":
             application.hr_status=status
 
-            #Sending an email to the employee once the leave has been fully approved
-            if status == "Approved":
-                #Getting the employee's email and name
-                employee_email=application.employee.email
-                employee_name=application.employee.full_name()
+            # #Sending an email to the employee once the leave has been fully approved
+            # if status == "Approved":
+            #     #Getting the employee's email and name
+            #     employee_email=application.employee.email
+            #     employee_name=application.employee.full_name()
 
-                #Sending the email
-                send_approved_leave(employeeEmail=employee_email, startDate=application.start_date, duration=application.total_days, employeeName=employee_name,endDate=application.end_date)
+            #     #Sending the email
+            #     send_approved_leave(employeeEmail=employee_email, startDate=application.start_date, duration=application.total_days, employeeName=employee_name,endDate=application.end_date)
 
         db.session.add(application)
         db.session.commit()
 
         #Returning a success message for approved requests
         if status == "Approved":
-            return make_response(jsonify({"success": "Leave application approved successfully"}),200)
+            try:
+                #Getting the employee's email and name
+                employee_email=application.employee.email
+                employee_name=application.employee.full_name()
+
+                #Sending the email
+                send_approved_leave(employeeEmail=employee_email, startDate=application.start_date, duration=application.total_days, employeeName=employee_name,endDate=application.end_date)
+                return make_response(jsonify({"success": "Leave application approved successfully"}),200)
+            except Exception as e:
+                print(e)
+                return make_response(jsonify({"error": "Error approving leave request. PLease try again later"}),500)
 
         #If the status is rejected, get the employee id from the leave application, query the leave days table and add back the number of leave days of that application
         elif status == "Rejected":
