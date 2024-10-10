@@ -13,6 +13,7 @@ import os
 from Mail.credentials import send_login_credentials
 from Mail.reset import send_otp
 from Mail.submitted import send_submitted_application
+from Mail.approved import send_approved_leave
 from Generations.password import random_password
 from Generations.otp import get_otp
 import redis
@@ -655,6 +656,15 @@ class PendingEmployeeRequestsByID(Resource):
         
         elif role == "HR":
             application.hr_status=status
+
+            #Sending an email to the employee once the leave has been fully approved
+            if status == "Approved":
+                #Getting the employee's email and name
+                employee_email=application.employee.email
+                employee_name=application.employee.full_name()
+
+                #Sending the email
+                send_approved_leave(employeeEmail=employee_email, startDate=application.start_date, duration=application.total_days, employeeName=employee_name,endDate=application.end_date)
 
         db.session.add(application)
         db.session.commit()
