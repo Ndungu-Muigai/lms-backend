@@ -6,13 +6,23 @@ from datetime import timedelta
 
 load_dotenv()
 
-configuration=sib_api_v3_sdk.Configuration()
+configuration = sib_api_v3_sdk.Configuration()
 configuration.api_key["api-key"] = os.environ["SENDINBLUE_API_KEY"]
-api_instance=sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+
+def get_next_working_day(end_date):
+    # Check if the end date is a weekend (Saturday = 5, Sunday = 6)
+    if end_date.weekday() == 5:  # Saturday
+        return end_date + timedelta(days=2)  # Move to Monday
+    return end_date + timedelta(days=1)  # Regular case, just add one day
 
 def send_approved_leave(employeeEmail, employeeName, startDate, endDate, duration):
-    subject="Leave approval"
-    sender={"name": app.app.config["SENDER_NAME"], "email": app.app.config["SENDER_EMAIL"]}
+    subject = f"Leave approval- {startDate} to {endDate}"
+    sender = {"name": app.app.config["SENDER_NAME"], "email": app.app.config["SENDER_EMAIL"]}
+
+    # Get the next working day after the end date
+    next_working_day = get_next_working_day(endDate)
+
     email_content = f"""
         <p>Dear {employeeName}</p>
 
@@ -23,7 +33,7 @@ def send_approved_leave(employeeEmail, employeeName, startDate, endDate, duratio
             <li><b>Leave Duration: {duration}</b></li>
         </ul>
 
-        <p>Enjoy your break and we look forward to seeing you on {endDate + timedelta(days=1)} &#128522;</p>
+        <p>Enjoy your break and we look forward to seeing you on {next_working_day} &#128522;</p>
         <b>NB: This is a system generated email. Please DO NOT reply to this email thread.</b>
     """
 
