@@ -567,11 +567,29 @@ api.add_resource(LeaveApplicationByID, "/leave-applications/<int:id>")
 #All employee leave requests
 class ApprovedRequests(Resource):
     def get(self):
-        #Getting all the requests
-        leave_requests=LeaveApplication.query.filter(LeaveApplication.hod_status=="Approved",LeaveApplication.gm_status=="Approved",LeaveApplication.hr_status=="Approved").all()
+        #Querying the database to get all approved leave requests based on the country
+        #Getting the session data
+        session_data=get_session_data()
 
-        #Creating a dict of the requests
-        leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(leave_requests, many=True)
+        # Get the employee ID from the session
+        employee_role = session_data["employee_role"]
+        employee_country = session_data["employee_country"]
+
+        leave_requests_dict=""
+
+        if employee_role == "HR":
+            #Getting all the requests for the specific country
+            leave_requests=LeaveApplication.query.filter(LeaveApplication.hod_status=="Approved",LeaveApplication.gm_status=="Approved",LeaveApplication.hr_status=="Approved",LeaveApplication.employee.country==employee_country).all()
+
+            #Creating a dict of the requests
+            leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(leave_requests, many=True)
+
+        elif employee_role == "HR-PT":
+            #Getting all the requests
+            leave_requests=LeaveApplication.query.filter(LeaveApplication.hod_status=="Approved",LeaveApplication.gm_status=="Approved",LeaveApplication.hr_status=="Approved").all()
+
+            #Creating a dict of the requests
+            leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(leave_requests, many=True)
 
         return make_response(jsonify(leave_requests_dict), 200)
 
@@ -905,6 +923,15 @@ api.add_resource(EmployeeByID, "/employees-data/<int:id>")
 #Employee leave history resource
 class EmployeeLeaveHistory(Resource):
     def get(self, id):
+        #Getting the session data
+        session_data=get_session_data()
+
+        #Getting the role of the currently logged in user
+        employee_role=session_data["employee_role"]
+
+        if employee_role != "HR-PT":
+            return make_response(jsonify({"error": "You don't have the rights"}),409)
+
         #Getting the employee's leave applications from the database
         employee_leaves=LeaveApplication.query.filter_by(employee_id=id).all()
         employee_leaves_dict=LeaveApplicationsSchema(only=("id", "leave_type","leave_duration", "start_date","end_date","total_days", "file_attachment","reason","hod_status","gm_status","hr_status")).dump(employee_leaves,many=True)
