@@ -770,7 +770,7 @@ class Employees(Resource):
 
         if employee_role == "HR-PT":
             employees=Employee.query.filter(Employee.id != employee_id).all()
-            employee_dict=EmployeeSchema().dump(employees, many=True)
+            employee_dict=EmployeeSchema(only=("id","first_name", "last_name","email","branch")).dump(employees, many=True)
         else:
             #Getting all employees from the database and creating a dict 
             employees=Employee.query.filter(Employee.id != employee_id, Employee.country == employee_country).all()
