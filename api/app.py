@@ -657,18 +657,20 @@ class PendingEmployeeRequestsByID(Resource):
         elif role == "HR":
             application.hr_status=status
 
+            #Sending an email to the employee once the leave has been fully approved
+            if status == "Approved":
+                #Getting the employee's email and name
+                employee_email=application.employee.email
+                employee_name=application.employee.full_name()
+
+                #Sending the email
+                send_approved_leave(employeeEmail=employee_email, startDate=application.start_date, duration=application.total_days, employeeName=employee_name,endDate=application.end_date)
+
         db.session.add(application)
         db.session.commit()
 
         #Returning a success message for approved requests
         if status == "Approved":
-            #Getting the employee's email and name
-            employee_email=application.employee.email
-            employee_name=application.employee.full_name()
-
-            #Sending the email
-            send_approved_leave(employeeEmail=employee_email, startDate=application.start_date, duration=application.total_days, employeeName=employee_name,endDate=application.end_date)
-
             return make_response(jsonify({"success": "Leave application approved successfully"}),200)
 
         #If the status is rejected, get the employee id from the leave application, query the leave days table and add back the number of leave days of that application
