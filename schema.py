@@ -23,7 +23,7 @@ class LeaveDaysSchema(Schema):
     paternity_leave=fields.Float(required=True)
 
 class LeaveApplicationsSchema(Schema):
-    employee=fields.Nested(EmployeeSchema(only=("first_name", "last_name")), required=True)
+    employee=fields.Nested(EmployeeSchema(only=("first_name", "last_name","branch")), required=True)
     id=fields.Integer(required=True)
     leave_type=fields.Str(required=True)
     leave_duration=fields.Str(required=True)
