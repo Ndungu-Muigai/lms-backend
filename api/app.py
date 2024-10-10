@@ -404,7 +404,8 @@ class LeaveApplications(Resource):
             {
                 "leave_days": leave_days_dict,
                 "leave_applications": leave_applications_dict,
-                "gender": employee.gender
+                "gender": employee.gender,
+                "country": employee.country
             }
         ),200)
     
