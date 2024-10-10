@@ -785,6 +785,7 @@ class Employees(Resource):
         first_name=request.json["first_name"]
         last_name=request.json["last_name"]
         email=request.json["email"]
+        branch=request.json["branch"]
         country=request.json["country"]
         phone=request.json["phone"]
         gender=request.json["gender"]
@@ -812,7 +813,7 @@ class Employees(Resource):
         hashed_password=hashlib.md5(password.encode("utf-8")).hexdigest()
 
         #Creating the employee's account
-        new_employee=Employee(first_name=first_name, username=username, password=hashed_password, last_name=last_name, gender=gender, department=department, country=country, phone=phone, role=role, position=position, email=email)
+        new_employee=Employee(first_name=first_name, username=username, password=hashed_password, last_name=last_name, gender=gender, department=department, country=country, phone=phone, role=role, position=position, email=email, branch=branch)
 
         #Sending the email with the login credentials
         send_login_credentials(last_name=last_name, username=username, first_name=first_name, email=email, password=password)
