@@ -761,11 +761,7 @@ class Employees(Resource):
 
         #Getting the role of the currently logged in user
         employee_role=session_data["employee_role"]
-        
-        #If the role is not HR, return an error
-        if employee_role != "HR" or employee_role != "HR-PT":
-            return make_response(jsonify({"error": "You do not have the rights to do that"}), 405)
-        
+                
         employee_dict=""
 
         if employee_role == "HR-PT":
