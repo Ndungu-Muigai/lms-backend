@@ -748,9 +748,16 @@ class Employees(Resource):
         if employee_role != "HR":
             return make_response(jsonify({"error": "You do not have the rights to do that"}), 405)
         
-        #Getting all employees from the database and creating a dict 
-        employees=Employee.query.filter(Employee.id != employee_id, Employee.country == employee_country).all()
-        employee_dict=EmployeeSchema().dump(employees, many=True)
+        employee_dict=""
+
+        if employee_role == "HR-PT":
+            employees=Employee.query.filter(Employee.id != employee_id).all()
+            employee_dict=EmployeeSchema().dump(employees, many=True)
+        else:
+            #Getting all employees from the database and creating a dict 
+            employees=Employee.query.filter(Employee.id != employee_id, Employee.country == employee_country).all()
+            employee_dict=EmployeeSchema().dump(employees, many=True)
+
         return make_response(jsonify(
             {
                 "success": "You have access rights",
@@ -895,6 +902,16 @@ class EmployeeByID(Resource):
 
 api.add_resource(EmployeeByID, "/employees-data/<int:id>")
 
+#Employee leave history resource
+class EmployeeLeaveHistory(Resource):
+    def get(self, id):
+        #Getting the employee's leave applications from the database
+        employee_leaves=LeaveApplication.query.filter_by(employee_id=id).all()
+        employee_leaves_dict=LeaveApplicationsSchema(only=("id", "leave_type","leave_duration", "start_date","end_date","total_days", "file_attachment","reason","hod_status","gm_status","hr_status")).dump(employee_leaves,many=True)
+
+        print(employee_leaves_dict)
+
+api.add_resource(EmployeeLeaveHistory, "employee-leave-history")
 
 #Profile resource
 class Profile(Resource):
