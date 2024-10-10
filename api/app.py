@@ -579,7 +579,7 @@ class ApprovedRequests(Resource):
 
         if employee_role == "HR":
             #Getting all the requests for the specific country
-            leave_requests=LeaveApplication.query.filter(LeaveApplication.hod_status=="Approved",LeaveApplication.gm_status=="Approved",LeaveApplication.hr_status=="Approved",LeaveApplication.employee.country==employee_country).all()
+            leave_requests=LeaveApplication.query.filter(LeaveApplication.hod_status=="Approved",LeaveApplication.gm_status=="Approved",LeaveApplication.hr_status=="Approved",LeaveApplication.employee.has(Employee.country == employee_country)).all()
 
             #Creating a dict of the requests
             leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(leave_requests, many=True)
