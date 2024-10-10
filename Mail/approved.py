@@ -2,6 +2,7 @@ import sib_api_v3_sdk
 from api import app
 from dotenv import load_dotenv
 import os
+from datetime import timedelta
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ def send_approved_leave(employeeEmail, employeeName, startDate, endDate, duratio
             <li><b>Leave Duration: {duration}</b></li>
         </ul>
 
-        <p>Enjoy your break and we look forward to seeing you on {endDate + 1} &#128522;</p>
+        <p>Enjoy your break and we look forward to seeing you on {endDate + timedelta(days=1)} &#128522;</p>
         <b>NB: This is a system generated email. Please DO NOT reply to this email thread.</b>
     """
 
