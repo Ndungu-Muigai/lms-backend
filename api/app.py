@@ -527,7 +527,7 @@ class LeaveApplications(Resource):
             superior=Employee.query.filter(Employee.role=="GM", Employee.department==employee_department).first()
 
         try:
-            send_submitted_application(fullName=superior.full_name(), email=superior.email, employeeName=Employee.query.filter_by(id=employee_id).first().full_name(), startDate=start_date, endDate=end_date, duration=leave_duration)
+            send_submitted_application(fullName=superior.full_name(), email=superior.email, employeeName=Employee.query.filter_by(id=employee_id).first().full_name(), startDate=start_date, endDate=end_date, total_days=total_days)
 
             #Commiting the changes made to the database
             db.session.commit()

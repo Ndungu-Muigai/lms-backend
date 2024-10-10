@@ -9,7 +9,7 @@ configuration = sib_api_v3_sdk.Configuration()
 configuration.api_key["api-key"] = os.environ["SENDINBLUE_API_KEY"]
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
 
-def send_submitted_application(fullName, email, employeeName, startDate, endDate, duration):
+def send_submitted_application(fullName, email, employeeName, startDate, endDate, total_days):
     subject = f"Leave application submission - {employeeName}"
     sender = {"name": app.app.config["SENDER_NAME"], "email": app.app.config["SENDER_EMAIL"]}
     email_content = f"""
@@ -19,7 +19,7 @@ def send_submitted_application(fullName, email, employeeName, startDate, endDate
         <ul>
             <li><b>Start Date: {startDate}</b></li>
             <li><b>End Date: {endDate}</b></li>
-            <li><b>Leave Duration: {duration} day</b></li>
+            <li><b>Duration: {total_days} days</b></li>
         </ul>
 
         <p>Kindly <a href="https://mobikey-lms.vercel.app/">log in</a> and review the application</p>
