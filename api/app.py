@@ -54,7 +54,7 @@ s3 = boto3.client("s3", region_name=S3_REGION, aws_access_key_id=S3_ACCESS_KEY, 
 migrate = Migrate(app, db)
 db.init_app(app)
 
-CORS(app)
+CORS(app, origins=["http://localhost:3000", "https://mobikey-lms.vercel.app"])
 
 Session(app)
 # Wrapping the app as an API instance
