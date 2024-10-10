@@ -591,7 +591,10 @@ class ApprovedRequests(Resource):
             #Creating a dict of the requests
             leave_requests_dict=LeaveApplicationsSchema(only=("id","employee", "leave_type", "leave_duration","start_date", "end_date", "total_days","file_attachment","status")).dump(leave_requests, many=True)
 
-        return make_response(jsonify(leave_requests_dict), 200)
+        return make_response(jsonify({
+            "success" : "Fetched successfully",
+            "leave_data": leave_requests_dict
+        }), 200)
 
 api.add_resource(ApprovedRequests, "/approved-requests")
 
