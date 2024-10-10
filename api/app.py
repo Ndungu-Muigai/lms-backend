@@ -911,7 +911,7 @@ class EmployeeLeaveHistory(Resource):
 
         print(employee_leaves_dict)
 
-api.add_resource(EmployeeLeaveHistory, "employee-leave-history")
+api.add_resource(EmployeeLeaveHistory, "/employee-leave-history")
 
 #Profile resource
 class Profile(Resource):
